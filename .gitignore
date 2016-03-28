@@ -1,2 +1,7 @@
 *.swp
 *.o
+scan
+parser
+*.cmm
+*.c
+log
