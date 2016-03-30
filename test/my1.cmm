@@ -1,11 +1,5 @@
-int main(){
-	// 234564323456
-	
-	/*
-	/*//*j
-
-
-	*/
-	/*
-	~
+int k;
+int main({
+	int i = 0
+	return 0;
 }

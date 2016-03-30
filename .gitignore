@@ -2,5 +2,7 @@
 *.o
 scan
 parser
-*.c
+lex.yy.c
+*.tab.c
+*.tab.h
 log

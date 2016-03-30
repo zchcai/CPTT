@@ -19,8 +19,10 @@ letter_	[_A-Za-z]
 digit	[0-9]
 id		{letter_}({letter_}|{digit}){0,31}
 octal	0[0-7]+
+illegaloct	0[0-7]*[89][0-9]*
 decimal 0|([1-9][0-9]*)
 hex		0[xX][0-9a-fA-F]+
+illegalhex	0[xX][0-9a-fA-F]*[g-zG-Z]({letter}|{digit})*
 float	{decimal}\.{digit}+
 exp		(({digit}+\.{digit}*)|(\.{digit}+))[eE][+-]?{digit}+
 type	(int)|(float)
@@ -36,6 +38,18 @@ struct	{yylval = install(STRUCT);return STRUCT;}
 {octal}	{yylval = install_int(8);return INT;}
 {decimal}	{yylval = install_int(10);return INT;}
 {hex}	{yylval = install_int(16);return INT;}
+{illegalhex}	{
+	yylval = install(INT);
+	lex_error ++;
+	printf("Error type A at Line %d: Illegal hexadecimal number \'%s\'.\n", yylineno, yytext);
+	return INT;
+}
+{illegaloct}	{
+	yylval = install(INT);
+	lex_error ++;
+	printf("Error type A at Line %d: Illegal octal number \'%s\'.\n", yylineno, yytext);
+	return INT;
+}
 {float}|{exp}	{yylval = install_float();return FLOAT;}
 "!"	{yylval = install(NOT);return NOT;}
 "="	{yylval = install(ASSIGNOP);return ASSIGNOP;}
@@ -70,22 +84,22 @@ struct	{yylval = install(STRUCT);return STRUCT;}
 		}
 		if ( c == EOF ) {
 			//error( "EOF in comment" );
-			printf("Error type A at Line %d: EOF in comment\n", yylineno);
+			printf("Error type A at Line %d: EOF in comment.\n", yylineno);
 			lex_error ++;
 			break;
 		}
 	}
 }
 "*/"	{ 
-	printf("Error type A at Line %d: Expected start of comment\n", yylineno);
-	lex_error ++;	
+	printf("Error type A at Line %d: Unexpected '*/', expecting '/*' before.\n", yylineno);
+	lex_error ++;
 }
 "//"	{
 	char c = input();
 	while(c != '\n' && c != '\r') c = input();
 }
 .	{
-	printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
+	printf("Error type A at Line %d: Mysterious characters \'%s\'.\n", yylineno, yytext);
 	lex_error ++;
 }
 %%

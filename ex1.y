@@ -26,6 +26,7 @@
 %error-verbose
 /* declared tokens */
 %token INT FLOAT ID TYPE
+%nonassoc LOWER_THAN_SEMI
 %token SEMI COMMA
 %token LC RC
 %nonassoc LOWER_THAN_ELSE
@@ -53,8 +54,11 @@ ExtDefList	: ExtDef ExtDefList {$$ = create_node(ExtDefList, 2, $1, $2);}
 	| {$$ = create_node(ExtDefList, 0);}
 	;
 ExtDef	: Specifier ExtDecList SEMI {$$ = create_node(ExtDef, 3, $1, $2, $3);}
+	| Specifier ExtDecList %prec LOWER_THAN_SEMI {yyerror("Missing \";\"");}
 	| Specifier SEMI {$$ = create_node(ExtDef, 2, $1, $2);}
+	| Specifier %prec LOWER_THAN_SEMI {yyerror("Missing \";\"");}
 	| Specifier FunDec CompSt {$$ = create_node(ExtDef, 3, $1, $2, $3);}
+	| error SEMI
 	;
 ExtDecList	: VarDec {$$ = create_node(ExtDecList, 1, $1);}
 	| VarDec COMMA ExtDecList {$$ = create_node(ExtDecList, 3, $1, $2, $3);}
@@ -75,14 +79,15 @@ VarDec	: ID {$$ = create_node(VarDec, 1, $1);}
 	;
 FunDec	: ID LP VarList RP {$$ = create_node(FunDec, 4, $1, $2, $3, $4);}
 	| ID LP RP {$$ = create_node(FunDec, 3, $1, $2, $3);}
+	| ID LP %prec LOWER_THAN_SEMI {yyerror("Missing \")\" or Specifier");}
 	;
 VarList	: ParamDec COMMA VarList {$$ = create_node(VarList, 3, $1, $2, $3);}
 	| ParamDec {$$ = create_node(VarList, 1, $1);}
 	;
 ParamDec	: Specifier VarDec {$$ = create_node(ParamDec, 2, $1, $2);}
 	;
-
 CompSt	: LC DefList StmtList RC {$$ = create_node(CompSt, 4, $1, $2, $3, $4);}
+	| error RC
 	;
 StmtList	: Stmt StmtList {$$ = create_node(StmtList, 2, $1, $2);}
 	| {$$ = create_node(StmtList, 0);}
@@ -106,6 +111,7 @@ DecList	: Dec {$$ = create_node(DecList, 1, $1);}
 	;
 Dec	: VarDec {$$ = create_node(Dec, 1, $1);}
 	| VarDec ASSIGNOP Exp {$$ = create_node(Dec, 3, $1, $2, $3);}
+	| error INT
 	;
 
 Exp	: Exp ASSIGNOP Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
@@ -120,12 +126,15 @@ Exp	: Exp ASSIGNOP Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| MINUS Exp %prec UMINUS {$$ = create_node(Exp, 2, $1, $2);}
 	| NOT Exp {$$ = create_node(Exp, 2, $1, $2);}
 	| ID LP Args RP {$$ = create_node(Exp, 4, $1, $2, $3, $4);}
+	| ID LP %prec LOWER_THAN_SEMI {yyerror("Missing \")\"");}
 	| ID LP RP {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| Exp LB Exp RB {$$ = create_node(Exp, 4, $1, $2, $3, $4);}
 	| Exp DOT ID {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| ID {$$ = create_node(Exp, 1, $1);}
 	| INT {$$ = create_node(Exp, 1, $1);}
 	| FLOAT {$$ = create_node(Exp, 1, $1);}
+	| error RP
+	| error INT
 	;
 Args	: Exp COMMA Args {$$ = create_node(Args, 3, $1, $2, $3);}
 	| Exp {$$ = create_node(Args, 1, $1);}
@@ -212,7 +221,8 @@ int main(int argc, char** argv) {
 }
 yyerror(char* msg) {
 	syntax_error ++;
-	fprintf(stdout, "Error type B at Line %d: %s\n",yylineno, msg);
+	if(msg[0] == 's')msg[0] = 'S';
+	fprintf(stdout, "Error type B at Line %d: %s.\n",yylineno, msg);
 }
 char* type2name(int type){
 switch(type){
