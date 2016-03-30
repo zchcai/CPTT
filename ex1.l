@@ -6,6 +6,10 @@
 	struct Node* install_float();
 	struct Node* install(int);
 	struct Node* install_relop();
+	/*
+	int yycolumn = 1;
+	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng - 1; yycolumn += yyleng;
+	*/
 %}
 %option yylineno
 delim	[ \t\n\r]
@@ -21,7 +25,7 @@ float	{decimal}\.{digit}+
 exp		(({digit}+\.{digit}*)|(\.{digit}+))[eE][+-]?{digit}+
 type	(int)|(float)
 %%
-{ws}	{/* no action and no return */}
+{ws}	{/* no action and no return. For lloc, yylcolumn set to 1 when meet [\n\r\]. */}
 while	{yylval = install(WHILE);return WHILE;}
 if	{yylval = install(IF);return IF;}
 else	{yylval = install(ELSE);return ELSE;}
@@ -67,17 +71,23 @@ struct	{yylval = install(STRUCT);return STRUCT;}
 		if ( c == EOF ) {
 			//error( "EOF in comment" );
 			printf("Error type A at Line %d: EOF in comment\n", yylineno);
+			lex_error ++;
 			break;
 		}
 	}
 }
-"*/"	{ printf("Error type A at Line %d: Expected start of comment\n", yylineno);
+"*/"	{ 
+	printf("Error type A at Line %d: Expected start of comment\n", yylineno);
+	lex_error ++;	
 }
 "//"	{
 	char c = input();
 	while(c != '\n' && c != '\r') c = input();
 }
-.	{printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);}
+.	{
+	printf("Error type A at Line %d: Mysterious characters \'%s\'\n", yylineno, yytext);
+	lex_error ++;
+}
 %%
 struct Node* install_type(){
 	struct Node* p = init_node(TYPE);

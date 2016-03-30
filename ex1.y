@@ -17,16 +17,19 @@
 	struct Node* create_node(int, int, ...);
 	char* type2name(int);
 	struct Node* Head = NULL;
+	int lex_error = 0, syntax_error = 0;
 /* declared non-terminals in some type */
 	enum nonTer{Program = 300, ExtDefList = 301, ExtDef, ExtDecList, Specifier, FunDec, CompSt, VarDec, StructSpecifier, OptTag, DefList, Tag, VarList, ParamDec, StmtList, Stmt, Exp, Def, DecList, Dec, Args};
+	enum relopType{GT = 400, LT = 401, GE, LE, EQ, NE}; 
 	#define YYSTYPE struct Node*
 %}
+%error-verbose
 /* declared tokens */
 %token INT FLOAT ID TYPE
 %token SEMI COMMA
-%token GT LT GE LE EQ NE 
 %token LC RC
-%token STRUCT RETURN IF ELSE WHILE
+%nonassoc LOWER_THAN_ELSE
+%nonassoc STRUCT RETURN IF ELSE WHILE
 /* 8 */
 %right ASSIGNOP
 /* 7 */
@@ -40,7 +43,7 @@
 /* 3 */
 %left STAR DIV
 /* 2 */
-%right NOT /* MINUS ? */
+%right NOT UMINUS /* OK if UMINUS is left or token */
 /* 1 */
 %left DOT LP RP LB RB
 %%
@@ -87,9 +90,10 @@ StmtList	: Stmt StmtList {$$ = create_node(StmtList, 2, $1, $2);}
 Stmt	: Exp SEMI {$$ = create_node(Stmt, 2, $1, $2);}
 	| CompSt {$$ = create_node(Stmt, 1, $1);}
 	| RETURN Exp SEMI {$$ = create_node(Stmt, 3, $1, $2, $3);}
-	| IF LP Exp RP Stmt {$$ = create_node(Stmt, 5, $1, $2, $3, $4, $5);}
+	| IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {$$ = create_node(Stmt, 5, $1, $2, $3, $4, $5);}
 	| IF LP Exp RP Stmt ELSE Stmt {$$ = create_node(Stmt, 6, $1, $2, $3, $4, $5, $6);}
 	| WHILE LP Exp RP Stmt {$$ = create_node(Stmt, 5, $1, $2, $3, $4, $5);}
+	| error SEMI
 	;
 
 DefList	: Def DefList {$$ = create_node(DefList, 2, $1, $2);}
@@ -113,7 +117,7 @@ Exp	: Exp ASSIGNOP Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| Exp STAR Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| Exp DIV Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| LP Exp RP {$$ = create_node(Exp, 3, $1, $2, $3);}
-	| MINUS Exp {$$ = create_node(Exp, 2, $1, $2);}
+	| MINUS Exp %prec UMINUS {$$ = create_node(Exp, 2, $1, $2);}
 	| NOT Exp {$$ = create_node(Exp, 2, $1, $2);}
 	| ID LP Args RP {$$ = create_node(Exp, 4, $1, $2, $3, $4);}
 	| ID LP RP {$$ = create_node(Exp, 3, $1, $2, $3);}
@@ -200,11 +204,15 @@ int main(int argc, char** argv) {
 	}
 	yyrestart(f);
 	yyparse();
-	print_node(Head, 0);
+	if((lex_error == 0) && (syntax_error == 0)){
+		/* Only Lab1 use this */
+		print_node(Head, 0);
+	}
 	return 0;
 }
 yyerror(char* msg) {
-	fprintf(stderr, "error: %s\n", msg);
+	syntax_error ++;
+	fprintf(stdout, "Error type B at Line %d: %s\n",yylineno, msg);
 }
 char* type2name(int type){
 switch(type){
