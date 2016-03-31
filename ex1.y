@@ -105,13 +105,14 @@ DefList	: Def DefList {$$ = create_node(DefList, 2, $1, $2);}
 	| {$$ = create_node(DefList, 0);}
 	;
 Def	: Specifier DecList SEMI {$$ = create_node(Def, 3, $1, $2, $3);}
+	| Specifier DecList Specifier DecList Specifier DecList SEMI %prec LOWER_THAN_SEMI {yyerror("Previous local definition expecting \";\"");}
+	| Specifier DecList Specifier DecList SEMI %prec LOWER_THAN_SEMI {yyerror("Previous local definition expecting \";\"");}
 	;
 DecList	: Dec {$$ = create_node(DecList, 1, $1);}
 	| Dec COMMA DecList {$$ = create_node(DecList, 3, $1, $2, $3);}
 	;
 Dec	: VarDec {$$ = create_node(Dec, 1, $1);}
 	| VarDec ASSIGNOP Exp {$$ = create_node(Dec, 3, $1, $2, $3);}
-	| error INT
 	;
 
 Exp	: Exp ASSIGNOP Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
@@ -134,7 +135,9 @@ Exp	: Exp ASSIGNOP Exp {$$ = create_node(Exp, 3, $1, $2, $3);}
 	| INT {$$ = create_node(Exp, 1, $1);}
 	| FLOAT {$$ = create_node(Exp, 1, $1);}
 	| error RP
+	| error RB
 	| error INT
+	| error FLOAT
 	;
 Args	: Exp COMMA Args {$$ = create_node(Args, 3, $1, $2, $3);}
 	| Exp {$$ = create_node(Args, 1, $1);}

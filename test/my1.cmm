@@ -1,5 +1,11 @@
 int k;
 int main({
 	int i = 0
+	int j = 0;
+	int t = 0;
+	float a
+	float b
+	float c;
+	calc(a, b, c)
 	return 0;
 }

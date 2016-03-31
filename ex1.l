@@ -99,7 +99,7 @@ struct	{yylval = install(STRUCT);return STRUCT;}
 	while(c != '\n' && c != '\r') c = input();
 }
 .	{
-	printf("Error type A at Line %d: Mysterious characters \'%s\'.\n", yylineno, yytext);
+	printf("Error type A at Line %d: Mysterious character \'%s\'.\n", yylineno, yytext);
 	lex_error ++;
 }
 %%
