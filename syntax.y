@@ -2,25 +2,15 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <stdarg.h>
-	struct Node{
-		int type, lineno, childno;
-		char* name;
-		union {
-			float Float;
-			int Int;
-		}value;
-		char String[32];
-		struct Node* parent;
-		struct Node* child[8];
-	};
+	#include "tree.h"
 	struct Node* init_node(int);
 	struct Node* create_node(int, int, ...);
 	char* type2name(int);
 	struct Node* Head = NULL;
 	int lex_error = 0, syntax_error = 0;
-/* declared non-terminals in some type */
-	enum nonTer{Program = 300, ExtDefList = 301, ExtDef, ExtDecList, Specifier, FunDec, CompSt, VarDec, StructSpecifier, OptTag, DefList, Tag, VarList, ParamDec, StmtList, Stmt, Exp, Def, DecList, Dec, Args};
-	enum relopType{GT = 400, LT = 401, GE, LE, EQ, NE}; 
+ 
+/* declared non-terminals in some type 
+	now transfer to tree.h*/
 	#define YYSTYPE struct Node*
 %}
 %error-verbose
@@ -58,6 +48,7 @@ ExtDef	: Specifier ExtDecList SEMI {$$ = create_node(ExtDef, 3, $1, $2, $3);}
 	| Specifier SEMI {$$ = create_node(ExtDef, 2, $1, $2);}
 	| Specifier %prec LOWER_THAN_SEMI {yyerror("Missing \";\"");}
 	| Specifier FunDec CompSt {$$ = create_node(ExtDef, 3, $1, $2, $3);}
+	| Specifier FunDec SEMI {$$ = create_node(ExtDef, 3, $1, $2, $3);}
 	| error SEMI
 	;
 ExtDecList	: VarDec {$$ = create_node(ExtDecList, 1, $1);}
@@ -185,6 +176,7 @@ struct Node* create_node(int type, int n, ...){
 	p->lineno = p->child[0]->lineno;
 	return p;
 }
+/* print_node is for lab1 and no use any more */
 void print_node(struct Node* root, int nLayer){
 	if(root == NULL){
 		printf("PRINT ERROR!!!!\n");
