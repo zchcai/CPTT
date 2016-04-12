@@ -1,9 +1,16 @@
 CMMFILES	= $(shell find test/ -name "*.cmm")
-OBJS	= ex1.l ex1.y
-parser	: $(OBJS)
-	flex ex1.l
-	bison -d ex1.y
-	gcc -o parser ex1.tab.c -ll -lfl -ly
+FLEX	= lexical.l
+SYN	= syntax.y
+FLEX_C	= lex.yy.c
+parser	: $(FLEX_C) syntax.tab.c main.c
+	gcc main.c syntax.tab.c -ll -lfl -ly -o parser 
+
+$(FLEX_C) : $(FLEX)
+	flex $(FLEX)
+
+syntax.tab.h syntax.tab.c : $(SYN)
+	bison -d $(SYN)
+
 test	: parser
 	for cmm in $(CMMFILES);\
 		do\

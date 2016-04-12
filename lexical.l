@@ -1,5 +1,5 @@
 %{
-	#include "ex1.tab.h"
+	#include "syntax.tab.h"
 	struct Node* install_type();
 	struct Node* install_id();
 	struct Node* install_int();
