@@ -27,7 +27,9 @@ int main(int argc, char** argv) {
 void dfs(struct Node* root){
 	if(root == NULL)return;
 	if(root->type == ExtDef){
-		/* four main parts */
+		/* four main parts in program,
+		 * here to construct symbol table
+		 */
 		printf("There is a ExtDef!\n");
 		struct Node* ch1 = root->child[1];
 		switch(ch1->type){
@@ -36,6 +38,8 @@ void dfs(struct Node* root){
 				return ;
 			case SEMI:
 				//TODO: ch0
+				struct Node* ch0 = root->child[0];
+
 				return ;
 
 			case FunDec:
