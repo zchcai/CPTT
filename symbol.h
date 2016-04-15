@@ -4,8 +4,8 @@ typedef struct FieldList_* FieldList;
 
 struct SNode_ {
 	char name[32];
-	enum{FUNC = 600, VARIABLE = 601, Definition, Declaration};
-	int funcOrVariable, visitedTag, lineNumber;
+	enum{FUNC = 600, VARIABLE = 601, Definition, Declaration}funcOrVariable;
+	int  visitedTag, lineNumber;
 	union{
 		struct FunctionMessage* Function;
 		Type Variable;
@@ -33,7 +33,11 @@ struct Type_ {
 	} u;
 };
 struct FieldList_ {
-	char* name; // 域的名字
+	char name[32]; // 域的名字
 	Type type; // 域的类型
 	FieldList tail; // 下一个域
 };
+SNode stInitNode(char* name);
+SNode stFind(char* name);
+void stInsert(SNode p);
+int stDelete(char* name);

@@ -2,7 +2,8 @@ CMMFILES	= $(shell find test/ -name "*.cmm")
 FLEX	= lexical.l
 SYN	= syntax.y
 FLEX_C	= lex.yy.c
-parser	: $(FLEX_C) syntax.tab.c main.c
+SYMBOL_SOURCE = symbol.c symbol.h
+parser	: $(FLEX_C) $(SYMBOL_SOURCE) syntax.tab.c main.c
 	gcc main.c syntax.tab.c -ll -lfl -ly -o parser 
 
 $(FLEX_C) : $(FLEX)

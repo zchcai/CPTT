@@ -1,10 +1,11 @@
-#include "symbol.h"
+#include <stdlib.h>
 #include <string.h>
+#include "symbol.h"
 SNode SHead = NULL;
-SNode stInitNode(){
-	SNode p = (SNode)malloc(sizeof(SNode_));
+SNode stInitNode(char* name){
+	SNode p = (SNode)malloc(sizeof(struct SNode_));
 	if(p == NULL)return NULL;
-	p->name = NULL;
+	strcpy(p->name, name);
 	p->funcOrVariable = 0;
 	p->visitedTag = 0;
 	p->lineNumber = 0;
@@ -17,10 +18,10 @@ SNode stInitNode(){
 SNode stFind(char* name){
 	SNode p = SHead;
 	while(p != NULL){
-		if(strcmp(name, p->name) == 0)return p;
+		if(strcmp(name, p->name) == 0)break;
 		p = p->next;
 	}
-	return NULL;
+	return p;
 }
 /* according to stFind's return */
 void stInsert(SNode p){
@@ -30,13 +31,13 @@ void stInsert(SNode p){
 	else {
 		SNode temp = SHead;
 		SHead = p;
-		p->next = SHead;
+		p->next = temp;
 	}
 }
 int stDelete(char* name){
 	SNode p = SHead;
 	if(p != NULL){
-		if(strcmp(name, p->name) == 0){
+		if(strcmp(name, p->name) == 1){
 			SHead = SHead->next;
 			free(p);
 			return 0;

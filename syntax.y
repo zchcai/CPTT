@@ -48,7 +48,6 @@ ExtDef	: Specifier ExtDecList SEMI {$$ = create_node(ExtDef, 3, $1, $2, $3);}
 	| Specifier SEMI {$$ = create_node(ExtDef, 2, $1, $2);}
 	| Specifier %prec LOWER_THAN_SEMI {yyerror("Missing \";\"");}
 	| Specifier FunDec CompSt {$$ = create_node(ExtDef, 3, $1, $2, $3);}
-	| Specifier FunDec SEMI {$$ = create_node(ExtDef, 3, $1, $2, $3);}
 	| error SEMI
 	;
 ExtDecList	: VarDec {$$ = create_node(ExtDecList, 1, $1);}
