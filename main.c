@@ -3,12 +3,12 @@
 #include "tree.h"
 #include "symbol.c"
 extern int lex_error, syntax_error;
-extern struct Node* Head;
-extern SNode SHead;
-void dfs(struct Node*);
-void doDec(struct Node*);
-void doVarDec(int, struct Node*);
-void doFunDec(struct Node*);
+extern Node* Head;
+extern SNode* SHead;
+void dfs(Node*);
+void doDec(Node*);
+void doVarDec(int, Node*);
+void doFunDec(Node*);
 void checkId(int, char* name);
 void semantic_error(int no, int line){
 	/* TODO now just put error type */
@@ -30,21 +30,19 @@ int main(int argc, char** argv) {
 		/* When no lexical and syntax error,
 		 * we start semantic analysis. */
 		dfs(Head);
-
 	}
 	return 0;
 }
-void dfs(struct Node* root){
+void dfs(Node* root){
 	if(root == NULL)return;
-	//printf("%s\n", root->name);
 	if(root->type == ExtDef){
 		/* four main parts in program,
 		 * here to construct symbol table
 		 */
 		//TODO Specifier analysis!!!!!!!!!
 		//now consider Specifier is TYPE, INT
-		struct Node* ch1 = root->child[1];
-		struct Node* v = ch1->child[0];
+		Node* ch1 = root->child[1];
+		Node* v = ch1->child[0];
 		switch(ch1->type){
 			case ExtDecList:
 				while(ch1->childno == 3){
@@ -58,7 +56,7 @@ void dfs(struct Node* root){
 			case SEMI:
 				//TODO ExtDef : Specifier SEMI
 				/*
-				struct Node* ch0 = root->child[0];
+				Node* ch0 = root->child[0];
 				if(ch0 != NULL)ch0 = ch0 -> child[0];
 				if(ch0 -> type == StructSpecifier && ch0 -> childno > 2)
 					defineStruct(ch0);
@@ -77,8 +75,8 @@ void dfs(struct Node* root){
 		//Def : Specifier DecList SEMI
 		//TODO Specifier analysis!!!!!!!!!
 		//now consider Specifier is TYPE, INT
-		struct Node* ch = root->child[1];
- 		struct Node* v  = NULL;
+		Node* ch = root->child[1];
+ 		Node* v  = NULL;
 		if(ch != NULL)v = ch->child[0];
 		else printf("Def's child error!\n");
 		while(v != NULL && ch != NULL && ch->childno == 3){
@@ -104,12 +102,12 @@ void dfs(struct Node* root){
 	for(i = 0; i< childno;i++)
 		dfs(root->child[i]);	
 }
-void doVarDec(int control, struct Node* p){
+void doVarDec(int control, Node* p){
 	if(control || (p == NULL)){
 		printf("VarDec error!\n");
 	}
 
-	struct Node* ch = p->child[0];
+	Node* ch = p->child[0];
 	if(ch == NULL){
 		printf("VarDec's child error!\n");
 		return ;
@@ -118,11 +116,11 @@ void doVarDec(int control, struct Node* p){
 		semantic_error(3, ch->lineno);
 		return ;
 	}
-	SNode s = stInitNode(ch->String);
+	SNode* s = stInitNode(ch->String);
 	if(s != NULL)stInsert(s);
 
 	if(p->childno == 1){
-		s->funcOrVariable = VARIABLE;
+		s->visitedTag = VARIABLE;
 		//TODO the specific type!!
 	}
 	else {
@@ -131,18 +129,18 @@ void doVarDec(int control, struct Node* p){
 	}
 	
 }
-void doFunDec(struct Node* p){
+void doFunDec(Node* p){
 	//TODO with VarList
-	struct Node* ch = p->child[0];
+	Node* ch = p->child[0];
 	if(stFind(ch->String) != NULL){
 		semantic_error(4, ch->lineno);
 		return ;
 	}
-	SNode s = stInitNode(ch->String);
+	SNode* s = stInitNode(ch->String);
 	stInsert(s);
 	
 	if(p->childno == 3){
-		s->funcOrVariable = FUNC;
+		s->visitedTag = FUNC;
 		//TODO Message!!!
 	}
 	else {
@@ -150,7 +148,7 @@ void doFunDec(struct Node* p){
 	}
 	return ;
 }
-void doDec(struct Node* p){
+void doDec(Node* p){
 	if(p == NULL){
 		printf("error in doDec function.\n");
 		return ;
@@ -166,37 +164,3 @@ void checkId(int error_type, char* name){
 	}
 	return ;
 }
-/*
-void defineStruct(struct Node* root){
-	// root -> type == StructSpecifier 
-	if(root == NULL)return;
-	ptag = root -> child[1];
-	if(ptag->childno){
-		SNode p = stFind(ptag->name);
-		if(p != NULL)semantic_error(3, ptag->lineno);
-		p = stInitNode(ptag->name);
-		if(p == NULL)printf("Symbol table error!\n");
-		stInsert(p);
-		p -> funcOrVariable = VARIABLE;
-		p -> Variable = structInit(root->child[3]);
-
-
-Type structInit(struct Node* root){
-	Type p = (Type)malloc(sizeof(Type_));
-	p -> kind = STRUCTURE;
-	FieldList head = (FieldList)malloc(sizeof(FieldList_));
-	while(root -> childno){
-		struct Node* def = root->child[0];
-		// check define or not 
-		struct Node* strOrType = def->child[0]->child[0];
-		if(strOrType->type != TYPE){
-			
-
-
-
-		root = root->child[1];
-	}
-	p -> structure = head;
-	return p;
-}
-*/

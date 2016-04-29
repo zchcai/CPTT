@@ -1,11 +1,11 @@
 %{
 	#include "syntax.tab.h"
-	struct Node* install_type();
-	struct Node* install_id();
-	struct Node* install_int();
-	struct Node* install_float();
-	struct Node* install(int);
-	struct Node* install_relop();
+	Node* install_type();
+	Node* install_id();
+	Node* install_int();
+	Node* install_float();
+	Node* install(int);
+	Node* install_relop();
 	/*
 	int yycolumn = 1;
 	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng - 1; yycolumn += yyleng;
@@ -103,8 +103,8 @@ struct	{yylval = install(STRUCT);return STRUCT;}
 	lex_error ++;
 }
 %%
-struct Node* install_type(){
-	struct Node* p = init_node(TYPE);
+Node* install_type(){
+	Node* p = init_node(TYPE);
 	if(p != NULL){
 		p->lineno = yylineno;
 		if(yytext[0]=='i')strcpy(p->String ,"int");
@@ -112,8 +112,8 @@ struct Node* install_type(){
 	}
 	return p;
 }
-struct Node* install_id(){
-	struct Node *p;
+Node* install_id(){
+	Node *p;
 	p = init_node(ID);
 	if(p != NULL){
 		p->lineno = yylineno;
@@ -121,31 +121,31 @@ struct Node* install_id(){
 	}
 	return p;
 }
-struct Node* install_int(int n){
-	struct Node* p = init_node(INT);
+Node* install_int(int n){
+	Node* p = init_node(INT);
 	if(p != NULL){
 		p->lineno = yylineno;
 		p->value.Int = strtol(yytext,NULL,n);
 	}
 	return p;
 }
-struct Node* install_float(){
-	struct Node* p = init_node(FLOAT);
+Node* install_float(){
+	Node* p = init_node(FLOAT);
 	if(p != NULL){
 		p->lineno = yylineno;
 		p->value.Float = atof(yytext);
 	}
 	return p;
 }
-struct Node* install(int Type){
-	struct Node* p = init_node(Type);
+Node* install(int Type){
+	Node* p = init_node(Type);
 	if(p != NULL){
 		p->lineno = yylineno;
 	}
 	return p;
 }
-struct Node* install_relop(int reltype){
-	struct Node* p = init_node(RELOP);
+Node* install_relop(int reltype){
+	Node* p = init_node(RELOP);
 	if(p != NULL){
 		p->lineno = yylineno;
 		p->value.Int = reltype;

@@ -3,15 +3,15 @@
 	#include <stdlib.h>
 	#include <stdarg.h>
 	#include "tree.h"
-	struct Node* init_node(int);
-	struct Node* create_node(int, int, ...);
+	Node* init_node(int);
+	Node* create_node(int, int, ...);
 	char* type2name(int);
-	struct Node* Head = NULL;
+	Node* Head = NULL;
 	int lex_error = 0, syntax_error = 0;
  
 /* declared non-terminals in some type 
 	now transfer to tree.h*/
-	#define YYSTYPE struct Node*
+	#define YYSTYPE Node*
 %}
 %error-verbose
 /* declared tokens */
@@ -134,10 +134,10 @@ Args	: Exp COMMA Args {$$ = create_node(Args, 3, $1, $2, $3);}
 	;
 %%
 #include "lex.yy.c"
-struct Node* init_node(int T){
+Node* init_node(int T){
 	int i;
-	struct Node* p;
-	if((p = (struct Node*)malloc(sizeof(struct Node))) == NULL)
+	Node* p;
+	if((p = (Node*)malloc(sizeof(Node))) == NULL)
 		return NULL;
 	p->type = T;
 	p->parent = NULL;
@@ -146,16 +146,16 @@ struct Node* init_node(int T){
 	for(i = 0; i < 8; i++)p->child[i] = NULL;
 	return p;
 }
-struct Node* create_node(int type, int n, ...){
+Node* create_node(int type, int n, ...){
 	int i;	
-	struct Node* p = init_node(type);
+	Node* p = init_node(type);
 	p->childno = n;
 	if(!n)return p;
-	struct Node* val;
+	Node* val;
 	va_list vl;
 	va_start(vl, n);
 	for(i = 0; i < n; i++){
-		val = va_arg(vl, struct Node*);
+		val = va_arg(vl, Node*);
 		switch(val -> type){
 /*
 			case ID:
@@ -176,7 +176,7 @@ struct Node* create_node(int type, int n, ...){
 	return p;
 }
 /* print_node is for lab1 and no use any more */
-void print_node(struct Node* root, int nLayer){
+void print_node(Node* root, int nLayer){
 	if(root == NULL){
 		printf("PRINT ERROR!!!!\n");
 		return;

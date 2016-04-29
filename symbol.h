@@ -1,43 +1,46 @@
-typedef struct SNode_* SNode;
-typedef struct Type_* Type;
-typedef struct FieldList_* FieldList;
-
-struct SNode_ {
+typedef struct SymbolTableNode {
 	char name[32];
-	enum{FUNC = 600, VARIABLE = 601, Definition, Declaration}funcOrVariable;
-	int  visitedTag, lineNumber;
+	enum{ FUNC = 600, /* for function Def */
+		VARIABLE = 601, /* for var Def */
+		STRUCTDEF = 602, 
+		DECLAR = 603,/* for func Dec */
+		UNCLEAR = 604
+	}visitedTag; 
+	int lineno;
 	union{
-		struct FunctionMessage* Function;
-		Type Variable;
+		struct FunctionMessageNode* func;
+		struct TypeNode* var;
 	}Message;
-	SNode next;
-};
+	struct SymbolTableNode* next;
+}SNode;
 
-struct FunctionMessage {
-	Type returnType;
+typedef struct FunctionMessageNode {
+	struct TypeNode* returnType;
 	struct{
-		Type p, next;
-	}parameter;
+		//TODO: now global var
+		SNode* p, next;
+	}para;
 	/*TODO: function field tag...*/
-};
+}Funcmsg;
 
-struct Type_ {
+struct TypeNode {
 	enum { BASIC, ARRAY, STRUCTURE } kind;
 	union {
 		// 基本类型
 		int basic;
 		// 数组类型信息包括元素类型与数组大小构成
-		struct { Type elem; int size; } array;
+		struct { struct TypeNode* elem; int size; } array;
 		// 结构体类型信息是一个链表
-		FieldList structure;
+		struct FieldListNode* structure;
 	} u;
-};
-struct FieldList_ {
+}Type;
+
+typedef struct FieldListNode{
 	char name[32]; // 域的名字
-	Type type; // 域的类型
-	FieldList tail; // 下一个域
-};
-SNode stInitNode(char* name);
-SNode stFind(char* name);
-void stInsert(SNode p);
+	struct TypeNode* type; // 域的类型
+	struct FieldListNode* tail; // 下一个域
+}FieldList;
+SNode* stInitNode(char* name);
+SNode* stFind(char* name);
+void stInsert(SNode* p);
 int stDelete(char* name);
