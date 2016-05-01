@@ -23,7 +23,7 @@ typedef struct FunctionMessageNode {
 	/*TODO: function field tag...*/
 }Funcmsg;
 
-struct TypeNode {
+typedef struct TypeNode {
 	enum { BASIC, ARRAY, STRUCTURE } kind;
 	union {
 		// 基本类型
@@ -43,4 +43,5 @@ typedef struct FieldListNode{
 SNode* stInitNode(char* name);
 SNode* stFind(char* name);
 void stInsert(SNode* p);
-int stDelete(char* name);
+void stPrint();
+

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include "syntax.tab.h"
 #include "tree.h"
@@ -5,11 +6,17 @@
 extern int lex_error, syntax_error;
 extern Node* Head;
 extern SNode* SHead;
+extern Type* TypeNodeInt;
+extern Type* TypeNodeFloat;
 void dfs(Node*);
 void doDec(Node*);
 void doVarDec(int, Node*);
 void doFunDec(Node*);
 void checkId(int, char* name);
+Type* doSpecifier(Node* p);
+Type* doDefListInStruct(Node* p);
+FieldList* doDecInStruct(Node*, Type*);
+Type* doVarDecInStruct(Node*, Type*);
 void semantic_error(int no, int line){
 	/* TODO now just put error type */
 	printf("Error type %d at Line %d\n", no, line);
@@ -30,6 +37,8 @@ int main(int argc, char** argv) {
 		/* When no lexical and syntax error,
 		 * we start semantic analysis. */
 		dfs(Head);
+		/* for test in lab2 */
+		stPrint();
 	}
 	return 0;
 }
@@ -40,7 +49,7 @@ void dfs(Node* root){
 		 * here to construct symbol table
 		 */
 		//TODO Specifier analysis!!!!!!!!!
-		//now consider Specifier is TYPE, INT
+		Type* type_result = doSpecifier(root -> child[0]);
 		Node* ch1 = root->child[1];
 		Node* v = ch1->child[0];
 		switch(ch1->type){
@@ -55,12 +64,6 @@ void dfs(Node* root){
 				return ;
 			case SEMI:
 				//TODO ExtDef : Specifier SEMI
-				/*
-				Node* ch0 = root->child[0];
-				if(ch0 != NULL)ch0 = ch0 -> child[0];
-				if(ch0 -> type == StructSpecifier && ch0 -> childno > 2)
-					defineStruct(ch0);
-					*/
 				return ;
 
 			case FunDec:
@@ -108,10 +111,7 @@ void doVarDec(int control, Node* p){
 	}
 
 	Node* ch = p->child[0];
-	if(ch == NULL){
-		printf("VarDec's child error!\n");
-		return ;
-	}
+	assert(ch != NULL);
 	if(stFind(ch->String) != NULL){
 		semantic_error(3, ch->lineno);
 		return ;
@@ -163,4 +163,121 @@ void checkId(int error_type, char* name){
 		return ;
 	}
 	return ;
+}
+Type* doSpecifier(Node* p){
+	printf("aaaaaa\n");
+	assert((p != NULL) && (p -> childno));
+	p = p -> child[0];
+	assert(p != NULL);
+	int t = p -> type;
+	if(t == TYPE){
+		if(strcmp(p -> String, "int") == 0){
+			return TypeNodeInt;
+		}
+		else if(strcmp(p -> String, "float") == 0){
+			return TypeNodeFloat;
+		}
+	}
+	else if(t == StructSpecifier){
+		assert((p -> childno == 2) || (p -> childno == 5));
+		if(p -> childno == 2){
+			/* def var */
+			p = p -> child[1];
+			assert((p != NULL) && (p -> childno));
+			p = p -> child[0];
+			SNode* stnode = stFind(p -> String);
+			if(stnode == NULL){
+				/* struct id but id not in symbol table */
+				semantic_error(17, p -> lineno);
+				return NULL;
+			}
+			else {
+				if(stnode -> visitedTag != STRUCTDEF){
+					/* conflict with exist name */
+					semantic_error(16, p -> lineno);
+				}
+				else {
+					return stnode -> Message.var;
+				}
+			}
+		}
+		else if(p -> childno == 5){
+			/* def structure */
+			Type* for_return = doDefListInStruct(p -> child[3]);
+			if(p -> child[1] -> childno){
+				p = p -> child[1] -> child[0];
+				assert(p!=NULL);
+				SNode* stnode = stFind(p -> String);
+				if(stnode == NULL){
+					SNode* newsym = stInitNode(p -> String);
+					newsym -> visitedTag = STRUCTDEF;
+					newsym -> lineno = p -> lineno;
+					newsym -> Message.var = for_return;
+					stInsert(newsym);
+				}
+				else {
+					/* conflict with existed symbol */
+					semantic_error(16, p -> lineno);
+				}
+			}
+			return for_return;
+		}
+	}
+	else {
+		printf("error in doSpecifier function\n");
+	}
+	return NULL;
+}
+Type* doDefListInStruct(Node* p){
+	Type* theType = (Type*)malloc(sizeof(Type));
+	theType -> kind = STRUCTURE;
+	theType -> u.structure = NULL;
+	while(p -> childno == 2){
+		Node* pdef = p -> child[0];
+		assert(pdef != NULL);
+		Type* valtype = doSpecifier(pdef -> child[0]);
+		Node* pdeclist = pdef -> child[1];
+		while(pdeclist -> childno == 3){
+			FieldList* pf = doDecInStruct(pdeclist -> child[0], valtype);
+			FieldList* temp = theType -> u.structure;
+			theType -> u.structure = pf;
+			pf -> tail = temp;
+
+			pdeclist = pdeclist -> child[2];
+		}
+		FieldList* pf = doDecInStruct(pdeclist -> child[0], valtype);
+		FieldList* temp = theType -> u.structure;
+		theType -> u.structure = pf;
+		pf -> tail = temp;
+	
+		p = p -> child[1];
+	}
+	return theType;
+}
+FieldList* doDecInStruct(Node* p, Type* valtype){
+	FieldList* pf = (FieldList*)malloc(sizeof(FieldList));
+	pf -> tail = NULL;
+	if(p -> childno == 3){
+		/* init in struct definition */
+		semantic_error(15, p -> lineno);
+	}
+	p = p -> child[0];
+	pf -> type = doVarDecInStruct(p, valtype);
+	while(p -> childno == 4){
+		p = p -> child[0];
+	}
+	strcpy(pf -> name, p -> String);
+	return pf;
+}
+Type* doVarDecInStruct(Node* p, Type* valtype){
+	if(p -> childno == 4){
+		Type* pvar = (Type*)malloc(sizeof(Type));
+		pvar -> kind = ARRAY;
+		pvar -> u.array.elem = doVarDecInStruct(p -> child[0], valtype);
+		pvar -> u.array.size = p -> child[2] -> value.Int;
+		return pvar;
+	}
+	else {
+		return valtype;
+	}
 }

@@ -1,7 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "symbol.h"
+/* SHead is the head of symbol table
+ * TODO new structure */
 SNode* SHead = NULL;
+Type TypeInt = {.kind = BASIC, .u.basic = INT};
+Type TypeFloat = {.kind = BASIC, .u.basic = FLOAT};
+Type* TypeNodeInt = &TypeInt;
+Type* TypeNodeFloat = &TypeFloat;
+
 SNode* stInitNode(char* name){
 	SNode* p = (SNode*)malloc(sizeof(SNode));
 	if(p == NULL)return NULL;
@@ -35,25 +42,11 @@ void stInsert(SNode* p){
 	}
 }
 /* no use of stDelete currently */
-int stDelete(char* name){
+void stPrint(){
 	SNode* p = SHead;
-	if(p != NULL){
-		if(strcmp(name, p->name) == 1){
-			SHead = SHead->next;
-			free(p);
-			return 0;
-		}
+	int i = 0;
+	while(p != NULL){
+		printf("No %d: %s\t%d\n", i, p->name, p->visitedTag);
+		p = p->next;
 	}
-	else return -1;
-	SNode* q = p->next;
-	while(q != NULL){
-		if(strcmp(name, q->name) == 0){
-			p->next = q->next;
-			free(q);
-			return 0;
-		}
-		p = q;
-		q = q->next;
-	}
-	return -1;
 }
