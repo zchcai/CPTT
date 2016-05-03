@@ -22,10 +22,8 @@ Type* doDefListInStruct(Node* p);
 FieldList* doDecInStruct(Node*, Type*);
 int doArgs(Node* p, Funcmsg* fm);
 Type* doVarDec(Node*, Type*);
-void semantic_error(int no, int line){
-	/* TODO now just put error type */
-	printf("Error type %d at Line %d\n", no, line);
-}
+void semantic_print_error(int no, int line, char* msg);
+void semantic_error(int no, int line);
 int main(int argc, char** argv) {
 	if (argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
@@ -42,7 +40,7 @@ int main(int argc, char** argv) {
 		 * we start semantic analysis. */
 		dfs(Head);
 		/* for test in lab2 */
-		stPrint();
+		//stPrint();
 	}
 	return 0;
 }
@@ -89,17 +87,16 @@ void dfs(Node* root){
 	/* L */
 	if(root -> type == Exp){
 		Type* drop = doExp(root);
-		//TODO type check
 	}
 	else if(root -> type == Stmt){
-		//TODO exp type check in while and if
-		//also for return type
 		int childno = root -> childno;
+		// for return type
 		if(childno == 3){
 			if(check(doExp(root -> child[1]), currentFuncReturnType) != 0){
 				semantic_error(8, root -> lineno);
 			}
 		}
+		// exp type check in while and if
 		else if(childno == 5 || childno == 7){
 			if(!isLogic(doExp(root -> child[2]))){
 				semantic_error(7, root -> lineno);
@@ -116,7 +113,7 @@ void doExtDecList(Node* p, Type* type){
 	}
 	SNode* s = stFind(tp -> String);
 	if(s != NULL){
-		semantic_error(3, tp -> lineno);
+		semantic_print_error(3, tp -> lineno, tp -> String);
 	}
 	else {
 		s = stInitNode(tp -> String);
@@ -144,7 +141,7 @@ void doFunDec(Node* p, Type* pt){
 	if(stFind(ch->String) != NULL){
 		/* a bit different with PDF:
 		 * conflict with any other symbol */
-		semantic_error(4, ch->lineno);
+		semantic_print_error(4, ch -> lineno, ch -> String);
 		return ;
 	}
 	SNode* s = stInitNode(ch->String);
@@ -181,8 +178,8 @@ void doFunDec(Node* p, Type* pt){
 	return ;
 }
 SNode* doParamDec(Node* p){
-	/* simplify: can def struct in func def */
-	// TODO
+	/* Hypothesis:
+	 * can def struct in func def */
 	Type* type = doSpecifier(p -> child[0]);
 	type = doVarDec(p -> child[1], type);
 	p = p -> child[1];
@@ -194,7 +191,7 @@ SNode* doParamDec(Node* p){
 	SNode* ps = stFind(p -> String);
 	if(ps != NULL){
 		/* conflict with existed sym */
-		semantic_error(3, p -> lineno);
+		semantic_print_error(3, p -> lineno, p -> String);
 		ps = NULL;
 	}
 	else{
@@ -229,13 +226,13 @@ Type* doSpecifier(Node* p){
 			SNode* stnode = stFind(p -> String);
 			if(stnode == NULL){
 				/* struct id but id not in symbol table */
-				semantic_error(17, p -> lineno);
+				semantic_print_error(17, p -> lineno, p -> String);
 				return NULL;
 			}
 			else {
 				if(stnode -> visitedTag != STRUCTDEF){
 					/* conflict with exist name */
-					semantic_error(16, p -> lineno);
+					semantic_print_error(16, p -> lineno, p -> String);
 				}
 				else {
 					return stnode -> Message.var;
@@ -258,7 +255,7 @@ Type* doSpecifier(Node* p){
 				}
 				else {
 					/* conflict with existed symbol */
-					semantic_error(16, p -> lineno);
+					semantic_print_error(16, p -> lineno, p -> String);
 				}
 			}
 			return for_return;
@@ -271,6 +268,7 @@ Type* doSpecifier(Node* p){
 }
 void doDefInCompSt(Node* p){
 	Type* type = doSpecifier(p -> child[0]);
+	if(type == NULL)return ;
 	p = p -> child[1];
 	while(p -> childno == 3){
 		doDecInCompSt(p -> child[0], type);
@@ -287,7 +285,7 @@ void doDecInCompSt(Node* p, Type* type){
 	}
 	SNode* s = stFind(pvar -> String);
 	if(s != NULL){
-		semantic_error(3, pvar -> lineno);
+		semantic_print_error(3, pvar -> lineno, pvar -> String);
 		return ;
 	}
 	else {
@@ -308,17 +306,20 @@ Type* doExp(Node* p){
 		return p -> exptype;
 	}
 	int childno = p -> childno;
-	Type* finaltype = NULL;
+	/* Hypothesis:
+	 * for NULL means no handle, we set INT default 
+	 */
+	Type* finaltype = TypeNodeInt;
 	if(childno == 1){
 		Node* ch = p -> child[0];
 		if(ch -> type == ID){
 			SNode* s = stFind(ch -> String);
 			if(s == NULL){
-				semantic_error(1, ch -> lineno);
+				semantic_print_error(1, ch -> lineno, ch -> String);
 			}
 			else{
 				if(s -> visitedTag != VARIABLE){
-					semantic_error(1, ch -> lineno);
+					semantic_print_error(1, ch -> lineno, ch -> String);
 				}
 				else {
 					finaltype = s -> Message.var;
@@ -364,7 +365,7 @@ Type* doExp(Node* p){
 			else {
 				Type* ft = sfFind(t, ch2 -> String);
 				if(ft == NULL){
-					semantic_error(14, p -> lineno);
+					semantic_print_error(14, p -> lineno, ch2 -> String);
 					finaltype = TypeNodeInt;
 				}
 				else {
@@ -377,18 +378,18 @@ Type* doExp(Node* p){
 			SNode* s = stFind(ch0 -> String);
 			if(s == NULL){
 				/* no def when use func */
-				semantic_error(2, p -> lineno);
+				semantic_print_error(2, p -> lineno, ch0 -> String);
 				finaltype = TypeNodeInt;
 			}
 			else if(s -> visitedTag != FUNC){
-				semantic_error(11, p -> lineno);
+				semantic_print_error(11, p -> lineno, ch0 -> String);
 				finaltype = TypeNodeInt;
 			}
 			else {
 				// check fieldlist 
 				Funcmsg* fm = s -> Message.func;
 				if(fm -> para.no != 0){
-					semantic_error(9, p -> lineno);
+					semantic_print_error(9, p -> lineno, ch0 -> String);
 				}
 				finaltype = fm -> returnType;
 			}
@@ -404,7 +405,22 @@ Type* doExp(Node* p){
 					semantic_error(5, p -> lineno);
 				}
 				finaltype = t2;
-				// TODO error type 6 not deal with
+				// deal with error type 6 			
+				if(ch0 -> childno == 1){
+					if(ch0 -> child[0] -> type != ID){
+						semantic_error(6, p -> lineno);
+					}
+				}
+				else if(ch0 -> childno == 3){
+					if(ch0 -> child[1] -> type != DOT){
+						semantic_error(6, p -> lineno);
+					}
+				}
+				else if(ch0 -> childno == 4){
+					if(ch0 -> child[1] -> type != LB){
+						semantic_error(6, p -> lineno);
+					}
+				}
 			}
 			else if((ch1 -> type == AND) || (ch1 -> type == OR)){
 				if((!isLogic(t0)) || (!isLogic(t2))){
@@ -430,25 +446,35 @@ Type* doExp(Node* p){
 			SNode* s = stFind(ch0 -> String);
 			if(s == NULL){
 				/* no def when use func */
-				semantic_error(2, p -> lineno);
+				semantic_print_error(2, p -> lineno, ch0 -> String);
 				finaltype = TypeNodeInt;
 			}
 			else if(s -> visitedTag != FUNC){
-				semantic_error(11, p -> lineno);
+				semantic_print_error(11, p -> lineno, ch0 -> String);
 				finaltype = TypeNodeInt;
 			}
 			else {
 				// check fieldlist 
 				Funcmsg* fm = s -> Message.func;
 				if(doArgs(ch2, fm) != 0){
-					semantic_error(9, p -> lineno);
+					semantic_print_error(9, p -> lineno, ch0 -> String);
 				}
 				finaltype = fm -> returnType;
 			}
 		}
 		else if(ch0 -> type == Exp){
-			//TODO
-			//error type 10, 22
+			Type* arraytype = doExp(ch0);
+			if(arraytype -> kind != ARRAY){
+				semantic_error(10, p -> lineno);
+				finaltype = arraytype;
+			}
+			else {
+				finaltype = arraytype -> u.array.elem;
+			}
+			Type* numtype = doExp(ch2);
+			if(!isLogic(numtype)){
+				semantic_error(12, p -> lineno);
+			}
 		}
 	}
 	p -> exptype = finaltype;
@@ -507,7 +533,19 @@ int check(Type* a, Type* b){
 		return check(a -> u.array.elem, b -> u.array.elem);
 	}
 	else if(a -> kind == STRUCTURE){
-	//TODO
+		FieldList* af = a -> u.structure;
+		FieldList* bf = b -> u.structure;
+		while((af != NULL) || (bf != NULL)){
+			if(((bf == NULL) && (af !=NULL)) || ((af == NULL) && (bf !=NULL))){
+				return -1;
+			}
+			if(check(af -> type, bf -> type) != 0){
+				return -1;
+			}
+			af = af -> tail;
+			bf = bf -> tail;
+		}
+		return 0;
 	}
 	return -1;
 }
@@ -519,6 +557,10 @@ Type* doDefListInStruct(Node* p){
 		Node* pdef = p -> child[0];
 		assert(pdef != NULL);
 		Type* valtype = doSpecifier(pdef -> child[0]);
+		if(valtype == NULL){
+			p = p -> child[1];
+			continue;
+		}
 		Node* pdeclist = pdef -> child[1];
 		while(pdeclist -> childno == 3){
 			FieldList* pf = doDecInStruct(pdeclist -> child[0], valtype);
@@ -528,7 +570,7 @@ Type* doDefListInStruct(Node* p){
 				pf -> tail = temp;
 			}
 			else {
-				semantic_error(15, p -> lineno);
+				semantic_print_error(15, p -> lineno, pf -> name);
 			}
 			pdeclist = pdeclist -> child[2];
 		}
@@ -539,7 +581,7 @@ Type* doDefListInStruct(Node* p){
 			pf -> tail = temp;
 		}
 		else {
-			semantic_error(15, p -> lineno);
+			semantic_print_error(15, p -> lineno, pf -> name);
 		}
 		p = p -> child[1];
 	}
@@ -554,9 +596,75 @@ FieldList* doDecInStruct(Node* p, Type* valtype){
 	}
 	p = p -> child[0];
 	pf -> type = doVarDec(p, valtype);
-	while(p -> childno == 4){
+	while(p -> type != ID){
 		p = p -> child[0];
 	}
 	strcpy(pf -> name, p -> String);
 	return pf;
+}
+void semantic_print_error(int no, int line, char* msg){
+	printf("Error type %d at Line %d: ", no, line);
+	switch(no){
+		case 1:
+			printf("Undefined variable \"%s\".", msg);
+			break;
+		case 2:
+			printf("Undefined function \"%s\".", msg);
+			break;
+		case 3:
+			printf("Redefined variable \"%s\".", msg);
+			break;
+		case 4:
+			printf("Redefined function \"%s\".", msg);
+			break;
+		case 9:
+			printf("Function \"%s\" is not applicable for arguments.", msg);
+			break;
+		case 11:
+			printf("\"%s\" is not a function.", msg);
+			break;
+		case 14:
+			printf("Non-existent field \"%s\".", msg);
+			break;
+		case 15:
+			printf("Redefined field \"%s\".", msg);
+			break;
+		case 16:
+			printf("Duplicated name \"%s\".", msg);
+			break;
+		case 17:
+			printf("Undefined structure \"%s\".", msg);
+			break;
+	}
+	printf("\n");
+}
+void semantic_error(int no, int line){
+	printf("Error type %d at Line %d: ", no, line);
+	switch(no){
+		case 5:
+			printf("Type mismatched for assignment.");
+			break;
+		case 6:
+			printf("The left-hand side of an assignment must be a variable.");
+			break;
+		case 7:
+			printf("Type mismatched for oprands.");
+			break;
+		case 8:
+			printf("Type mismatched for return.");
+			break;
+		case 10:
+			printf("This is not an array.");
+			break;
+		case 12:
+			printf("Illegal use of array expression.");
+			break;
+		case 13:
+			printf("Illegal use of \".\".");
+			break;
+		case 15:
+			printf("Assignment in structure definition.");
+			break;
+	}
+	printf("\n");
 }

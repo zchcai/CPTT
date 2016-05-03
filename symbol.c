@@ -49,12 +49,20 @@ void stPrint(){
 	int i = 0;
 	printf("Symbol table:\n");
 	while(p != NULL){
-		printf("\tNo %d: %s\t%d\n", i, p->name, p->visitedTag);
+		printf("  No %d: %s\t%d\n", i, p->name, p->visitedTag);
 		if(p -> visitedTag == VARIABLE){
-			printf("\t\tkind no: %d\n", p -> Message.var -> kind);
+			printf("    kind no: %d\n", p -> Message.var -> kind);
 		}
 		else if(p -> visitedTag == FUNC){
-			printf("\t\treturnType kind no: %d\n", p ->Message.func -> returnType -> kind);
+			printf("    returnType kind no: %d\n", p ->Message.func -> returnType -> kind);
+		}
+		else if(p -> visitedTag == STRUCTDEF){
+			printf("    fieldlist:\n");
+			FieldList* head = p -> Message.var -> u.structure;
+			while(head != NULL){
+				printf("      name: %s\tkind no: %d\n", head -> name, head -> type ->kind);
+				head = head -> tail;
+			}
 		}
 		p = p->next;
 		++ i;
