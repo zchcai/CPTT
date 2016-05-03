@@ -12,13 +12,15 @@ typedef struct SymbolTableNode {
 		struct TypeNode* var;
 	}Message;
 	struct SymbolTableNode* next;
+	struct SymbolTableNode* fnext;
 }SNode;
 
 typedef struct FunctionMessageNode {
 	struct TypeNode* returnType;
 	struct{
 		//TODO: now global var
-		SNode* p, next;
+		SNode* head;
+		int no;
 	}para;
 	/*TODO: function field tag...*/
 }Funcmsg;
@@ -44,4 +46,4 @@ SNode* stInitNode(char* name);
 SNode* stFind(char* name);
 void stInsert(SNode* p);
 void stPrint();
-
+Type* sfFind(Type*, char*);

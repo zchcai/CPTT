@@ -8,6 +8,7 @@ typedef struct TreeNode{
 	char String[32];
 	struct TreeNode* parent;
 	struct TreeNode* child[8];
+	struct TypeNode* exptype;
 }Node;
 /* declared non-terminals in some type */
 	enum nonTer{Program = 300, ExtDefList = 301, ExtDef, ExtDecList, Specifier, FunDec, CompSt, VarDec, StructSpecifier, OptTag, DefList, Tag, VarList, ParamDec, StmtList, Stmt, Exp, Def, DecList, Dec, Args};

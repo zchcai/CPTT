@@ -4,6 +4,7 @@
 /* SHead is the head of symbol table
  * TODO new structure */
 SNode* SHead = NULL;
+/* executable code cannot occur outside of a function */
 Type TypeInt = {.kind = BASIC, .u.basic = INT};
 Type TypeFloat = {.kind = BASIC, .u.basic = FLOAT};
 Type* TypeNodeInt = &TypeInt;
@@ -16,6 +17,7 @@ SNode* stInitNode(char* name){
 	p->visitedTag = UNCLEAR;
 	p->lineno = 0;
 	p->next = NULL;
+	p->fnext = NULL;
 	return p;
 }
 
@@ -45,8 +47,20 @@ void stInsert(SNode* p){
 void stPrint(){
 	SNode* p = SHead;
 	int i = 0;
+	printf("Symbol table:\n");
 	while(p != NULL){
-		printf("No %d: %s\t%d\n", i, p->name, p->visitedTag);
+		printf("\tNo %d: %s\t%d\n", i, p->name, p->visitedTag);
 		p = p->next;
+		++ i;
 	}
+}
+Type* sfFind(Type* p, char* name){
+	FieldList* head = p -> u.structure;
+	while(head != NULL){
+		if(strcmp(name, head -> name) == 0){
+			return head -> type;
+		}
+		head = head -> tail;
+	}
+	return NULL;
 }

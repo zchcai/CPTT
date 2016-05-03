@@ -1,11 +1,17 @@
+int i,j;
+struct A{
+	int i,j;
+	float s[2];
+}a;
+float test(int i, int y){
+	int a,b,c;
+	float x,y,z;
+	int aa = x;
+	!x;
+	! 1.5;
+}
 int main(){
-	int i, j;
-	int j = 0;
-	return 0;
+	int b;
+	j = 0;
+	return j;
 }
-/*
-int test(){
-	k = 0;
-	return 0;
-}
-*/

@@ -144,6 +144,7 @@ Node* init_node(int T){
 	p->name = type2name(T);
 	p->childno = 0;
 	for(i = 0; i < 8; i++)p->child[i] = NULL;
+	p->exptype = NULL;
 	return p;
 }
 Node* create_node(int type, int n, ...){
@@ -157,15 +158,6 @@ Node* create_node(int type, int n, ...){
 	for(i = 0; i < n; i++){
 		val = va_arg(vl, Node*);
 		switch(val -> type){
-/*
-			case ID:
-		;
-		;
-		break;
-			case INT:
-		;
-		break;
-*/
 			default: break;
 		}
 		val -> parent = p;
