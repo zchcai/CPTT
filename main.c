@@ -8,6 +8,7 @@ extern Node* Head;
 extern SNode* SHead;
 extern Type* TypeNodeInt;
 extern Type* TypeNodeFloat;
+Type* currentFuncReturnType = NULL;
 void dfs(Node*);
 void doExtDecList(Node* p, Type* type);
 void doFunDec(Node*, Type*);
@@ -19,6 +20,7 @@ void doDefInCompSt(Node* p);
 void doDecInCompSt(Node* p, Type* type);
 Type* doDefListInStruct(Node* p);
 FieldList* doDecInStruct(Node*, Type*);
+int doArgs(Node* p, Funcmsg* fm);
 Type* doVarDec(Node*, Type*);
 void semantic_error(int no, int line){
 	/* TODO now just put error type */
@@ -62,12 +64,15 @@ void dfs(Node* root){
 			case FunDec:
 				//ch2:  CompSt (now : no SEMI)
 				doFunDec(ch1, type_result);
+				currentFuncReturnType = type_result;
 				dfs(root->child[2]);//TODO
+				currentFuncReturnType = NULL;
 				return ;
 		}
 	}
 	else if(root -> type == CompSt){
 		/* TODO multi fields function */
+		assert(currentFuncReturnType != NULL);
 	}
 	else if(root -> type == DefList){
 		if(root -> childno){
@@ -89,6 +94,17 @@ void dfs(Node* root){
 	else if(root -> type == Stmt){
 		//TODO exp type check in while and if
 		//also for return type
+		int childno = root -> childno;
+		if(childno == 3){
+			if(check(doExp(root -> child[1]), currentFuncReturnType) != 0){
+				semantic_error(8, root -> lineno);
+			}
+		}
+		else if(childno == 5 || childno == 7){
+			if(!isLogic(doExp(root -> child[2]))){
+				semantic_error(7, root -> lineno);
+			}
+		}
 	}
 }
 void doExtDecList(Node* p, Type* type){
@@ -336,15 +352,17 @@ Type* doExp(Node* p){
 		}
 	}
 	else if(childno == 3){
+		Node* ch0 = p -> child[0];
 		Node* ch1 = p -> child[1];
+		Node* ch2 = p -> child[2];
 		if(ch1 -> type == DOT){
-			Type* t = doExp(p -> child[0]);
+			Type* t = doExp(ch0);
 			if(t -> kind != STRUCTURE){
 				semantic_error(13, p -> lineno);
 				finaltype = TypeNodeInt;
 			}
 			else {
-				Type* ft = sfFind(t, p -> child[2] -> String);
+				Type* ft = sfFind(t, ch2 -> String);
 				if(ft == NULL){
 					semantic_error(14, p -> lineno);
 					finaltype = TypeNodeInt;
@@ -355,29 +373,122 @@ Type* doExp(Node* p){
 			}
 		}
 		else if(ch1 -> type == LP){
-			//TODO
+			//ID LP RP which is a function
+			SNode* s = stFind(ch0 -> String);
+			if(s == NULL){
+				/* no def when use func */
+				semantic_error(2, p -> lineno);
+				finaltype = TypeNodeInt;
+			}
+			else if(s -> visitedTag != FUNC){
+				semantic_error(11, p -> lineno);
+				finaltype = TypeNodeInt;
+			}
+			else {
+				// check fieldlist 
+				Funcmsg* fm = s -> Message.func;
+				if(fm -> para.no != 0){
+					semantic_error(9, p -> lineno);
+				}
+				finaltype = fm -> returnType;
+			}
 		}
 		else if(ch1 -> type == Exp){
 			finaltype = doExp(ch1);
 		}
-		else if(ch1 -> type == ASSIGNOP){
-			//TODO
-		}
-		else if(ch1 -> type == RELOP){
-			//TODO
-		}
-		else if((ch1 -> type == AND) || (ch1 -> type == OR)){
-			//TODO
-		}
 		else {
-			//TODO
+			Type* t0 = doExp(ch0);
+			Type* t2 = doExp(ch2);
+			if(ch1 -> type == ASSIGNOP){
+				if(check(t0, t2) != 0){
+					semantic_error(5, p -> lineno);
+				}
+				finaltype = t2;
+				// TODO error type 6 not deal with
+			}
+			else if((ch1 -> type == AND) || (ch1 -> type == OR)){
+				if((!isLogic(t0)) || (!isLogic(t2))){
+					semantic_error(7, p -> lineno);
+				}
+				finaltype = TypeNodeInt;
+			}
+			else { // relop + - * / 5 types
+				if((!isArith(t0)) || (!isArith(t2))){
+					semantic_error(7, p -> lineno);
+				}
+				else if(check(t0, t2) != 0){
+					semantic_error(7, p -> lineno);
+				}
+				finaltype = t0;
+			}
 		}
 	}
 	else if(childno == 4){
-		//TODO
+		Node* ch0 = p -> child[0];
+		Node* ch2 = p -> child[2];
+		if(ch0 -> type == ID){
+			SNode* s = stFind(ch0 -> String);
+			if(s == NULL){
+				/* no def when use func */
+				semantic_error(2, p -> lineno);
+				finaltype = TypeNodeInt;
+			}
+			else if(s -> visitedTag != FUNC){
+				semantic_error(11, p -> lineno);
+				finaltype = TypeNodeInt;
+			}
+			else {
+				// check fieldlist 
+				Funcmsg* fm = s -> Message.func;
+				if(doArgs(ch2, fm) != 0){
+					semantic_error(9, p -> lineno);
+				}
+				finaltype = fm -> returnType;
+			}
+		}
+		else if(ch0 -> type == Exp){
+			//TODO
+			//error type 10, 22
+		}
 	}
 	p -> exptype = finaltype;
 	return finaltype;
+}
+int doArgs(Node* p, Funcmsg* fm){
+	/* 1. num of args
+	 * 2. type of them
+	 */
+	int count = 1;
+	Node* temp = p;
+	while(temp -> childno == 3){
+		count ++;
+		temp = temp -> child[2];
+	}
+	if(count != fm -> para.no){
+		return -1;
+	}
+	FieldList* head = NULL;
+	while(p -> childno == 3){
+		FieldList* q = (FieldList*)malloc(sizeof(FieldList));
+		q -> type = doExp(p -> child[0]);
+		FieldList* tmp = head;
+		head = q;
+		q -> tail = tmp;
+		p = p -> child[2];
+	}
+	FieldList* q = (FieldList*)malloc(sizeof(FieldList));
+	q -> type = doExp(p -> child[0]);
+	FieldList* tmp = head;
+	head = q;
+	q -> tail = tmp;
+
+	SNode* origin = fm -> para.head;
+	while(count --){
+		if(check(origin -> Message.var, head -> type) != 0){
+			return -1;
+		}
+	}
+	return 0;
 }
 int isArith(Type* t){
 	return ((check(t, TypeNodeInt) == 0) || (check(t, TypeNodeFloat) == 0));
@@ -387,15 +498,15 @@ int isLogic(Type* t){
 }
 int check(Type* a, Type* b){
 	if(a == b)return 0;//no difference
-	if(a -> type != b -> type)return -1;
-	if(a -> type == BASIC){
+	if(a -> kind != b -> kind)return -1;
+	if(a -> kind == BASIC){
 		if(a -> u.basic == b -> u.basic)return 0;
 		else return -1;
 	}
-	else if(a -> type == ARRAY){
-		return check(a -> u.elem, b -> u.elem);
+	else if(a -> kind == ARRAY){
+		return check(a -> u.array.elem, b -> u.array.elem);
 	}
-	else if(a -> type == STRUCTURE){
+	else if(a -> kind == STRUCTURE){
 	//TODO
 	}
 	return -1;

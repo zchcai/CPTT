@@ -1,0 +1,6 @@
+int work(int i, int j, float k){
+	return k;
+}
+int main(){
+	return work(1, 3.4);
+}

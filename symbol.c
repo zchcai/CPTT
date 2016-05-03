@@ -50,6 +50,12 @@ void stPrint(){
 	printf("Symbol table:\n");
 	while(p != NULL){
 		printf("\tNo %d: %s\t%d\n", i, p->name, p->visitedTag);
+		if(p -> visitedTag == VARIABLE){
+			printf("\t\tkind no: %d\n", p -> Message.var -> kind);
+		}
+		else if(p -> visitedTag == FUNC){
+			printf("\t\treturnType kind no: %d\n", p ->Message.func -> returnType -> kind);
+		}
 		p = p->next;
 		++ i;
 	}
