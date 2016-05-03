@@ -1,9 +1,11 @@
-int work(int i, int asd, float k);
-int func();
-int func(int opop);
+int f(float x);
+int work(int i, int j, float k);
 int main(){
-	return work(1, 2, 3.4);
+	f(1 + 1.5);
+	return work(1, 2);
 }
 int work(int i, int j, float k){
 	return 0;
+}
+int f(float x){
 }
