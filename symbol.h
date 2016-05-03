@@ -9,11 +9,18 @@ typedef struct SymbolTableNode {
 	int lineno;
 	union{
 		struct FunctionMessageNode* func;
+		struct DeclarNode* declar;
 		struct TypeNode* var;
 	}Message;
 	struct SymbolTableNode* next;
 	struct SymbolTableNode* fnext;
 }SNode;
+
+typedef struct DeclarNode {
+	struct TypeNode* returnType;
+	struct FieldListNode* head;
+	int no;
+}Declarmsg;
 
 typedef struct FunctionMessageNode {
 	struct TypeNode* returnType;

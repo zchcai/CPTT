@@ -1,6 +1,9 @@
-int work(int i, int j, float k){
-	return k;
-}
+int work(int i, int asd, float k);
+int func();
+int func(int opop);
 int main(){
-	return work(1, 3.4);
+	return work(1, 2, 3.4);
+}
+int work(int i, int j, float k){
+	return 0;
 }

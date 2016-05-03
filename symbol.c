@@ -4,6 +4,7 @@
 /* SHead is the head of symbol table
  * TODO new structure */
 SNode* SHead = NULL;
+SNode* FunDeclarHead = NULL;
 /* executable code cannot occur outside of a function */
 Type TypeInt = {.kind = BASIC, .u.basic = INT};
 Type TypeFloat = {.kind = BASIC, .u.basic = FLOAT};
@@ -66,6 +67,14 @@ void stPrint(){
 		}
 		p = p->next;
 		++ i;
+	}
+	printf("Function declar:\n");
+	p = FunDeclarHead;
+	i = 0;
+	while(p != NULL){
+		printf("  No %d: %s\tLine: %d\n", i, p -> name, p -> lineno);
+		p = p -> next;
+		i ++;
 	}
 }
 Type* sfFind(Type* p, char* name){

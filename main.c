@@ -6,13 +6,16 @@
 extern int lex_error, syntax_error;
 extern Node* Head;
 extern SNode* SHead;
+extern SNode* FunDeclarHead;
 extern Type* TypeNodeInt;
 extern Type* TypeNodeFloat;
 Type* currentFuncReturnType = NULL;
 void dfs(Node*);
 void doExtDecList(Node* p, Type* type);
+void doFunDecInDeclar(Node* p, Type* pt);
 void doFunDec(Node*, Type*);
 int check(Type*, Type*);
+FieldList* doParamDecInDeclar(Node* p);
 SNode* doParamDec(Node* p);
 Type* doSpecifier(Node* p);
 Type* doExp(Node* p);
@@ -21,6 +24,7 @@ void doDecInCompSt(Node* p, Type* type);
 Type* doDefListInStruct(Node* p);
 FieldList* doDecInStruct(Node*, Type*);
 int doArgs(Node* p, Funcmsg* fm);
+void DeclarAndDefine();
 Type* doVarDec(Node*, Type*);
 void semantic_print_error(int no, int line, char* msg);
 void semantic_error(int no, int line);
@@ -34,15 +38,49 @@ int main(int argc, char** argv) {
 	yyrestart(f);
 	yyparse();
 	if((lex_error == 0) && (syntax_error == 0)){
-		/* Only Lab1 use this */
-		// print_node(Head, 0); 
-		/* When no lexical and syntax error,
-		 * we start semantic analysis. */
+		/* Only Lab1 use this 
+		 * print_node(Head, 0);
+
+		 * When no lexical and syntax error,
+		 * we start semantic analysis. 
+		 */
 		dfs(Head);
+		DeclarAndDefine();
 		/* for test in lab2 */
-		//stPrint();
+		// stPrint();
 	}
 	return 0;
+}
+void DeclarAndDefine(){
+	SNode* p = FunDeclarHead;
+	while(p != NULL){
+		SNode* temp = stFind(p -> name);
+		if(temp == NULL || temp -> visitedTag != FUNC){
+			semantic_print_error(18, p -> lineno, p -> name);
+		}
+		else {
+			if(check(p -> Message.declar -> returnType, temp -> Message.func -> returnType) != 0){
+				semantic_print_error(19, p -> lineno, p -> name);
+			}
+			else {
+				FieldList* af = p -> Message.declar -> head;
+				SNode* bs = temp -> Message.func -> para.head;
+				while((af != NULL) || (bs != NULL)){
+					if(((bs == NULL) && (af !=NULL)) || ((af == NULL) && (bs !=NULL))){
+						semantic_print_error(19, p -> lineno, p -> name);
+						break;
+					}
+					if(check(af -> type, bs -> Message.var) != 0){
+						semantic_print_error(19, p -> lineno, p -> name);
+						break;
+					}
+					af = af -> tail;
+					bs = bs -> fnext;
+				}
+			}
+		}
+		p = p -> next;
+	}
 }
 void dfs(Node* root){
 	if(root == NULL)return;
@@ -51,6 +89,11 @@ void dfs(Node* root){
 		 * here to construct symbol table
 		 */
 		Type* type_result = doSpecifier(root -> child[0]);
+		if(type_result == NULL){
+			/* Hypothesis:
+			 * This is a stupid error */
+			type_result = TypeNodeInt;
+		}
 		Node* ch1 = root->child[1];
 		switch(ch1->type){
 			case ExtDecList:
@@ -60,12 +103,19 @@ void dfs(Node* root){
 				//ExtDef : Specifier SEMI
 				return ;
 			case FunDec:
-				//ch2:  CompSt (now : no SEMI)
-				doFunDec(ch1, type_result);
-				currentFuncReturnType = type_result;
-				dfs(root->child[2]);//TODO
-				currentFuncReturnType = NULL;
-				return ;
+				//ch2:  CompSt 
+				if(root -> child[2] -> type == CompSt){
+					doFunDec(ch1, type_result);
+					currentFuncReturnType = type_result;
+					dfs(root->child[2]);//TODO
+					currentFuncReturnType = NULL;
+					return ;
+				}
+				/* ch2: SEMI */
+				else {
+					doFunDecInDeclar(ch1, type_result);
+					return ;
+				}
 		}
 	}
 	else if(root -> type == CompSt){
@@ -135,6 +185,74 @@ Type* doVarDec(Node* p, Type* type){
 	}
 	return finaltype;
 }
+void doFunDecInDeclar(Node* p, Type* pt){
+	assert(p != NULL);
+	Node* ch = p->child[0];
+	SNode* s = stInitNode(ch->String);
+	s -> visitedTag = DECLAR;
+	s -> lineno = p -> lineno;
+	Declarmsg* pfunc = (Declarmsg*)malloc(sizeof(Declarmsg));
+	pfunc -> returnType = pt;
+	pfunc -> head = NULL;
+	
+	assert((p -> childno == 3) || (p -> childno == 4));
+	pfunc -> no = 0;
+	if(p -> childno == 4){
+		p = p -> child[2];
+		while(p -> childno == 3){
+			FieldList* ppara = doParamDecInDeclar(p -> child[0]);
+			p = p -> child[2];
+			if(ppara != NULL){
+				FieldList* temp = pfunc -> head;
+				pfunc -> head = ppara;
+				ppara -> tail = temp;
+				pfunc -> no ++;
+			}
+		}
+		FieldList* ppara = doParamDecInDeclar(p -> child[0]);
+		if(ppara != NULL){
+			FieldList* temp = pfunc -> head;
+			pfunc -> head = ppara;
+			ppara -> tail = temp;
+			pfunc -> no ++;
+		}
+	}
+	s -> Message.declar = pfunc;
+	/* check whether conflict with existed declar */
+	SNode* cur = FunDeclarHead;
+	while(cur != NULL){
+		if(strcmp(ch->String, cur->name) == 0){
+			Declarmsg* a = cur -> Message.declar;
+			if(check(a -> returnType, pfunc -> returnType) != 0){
+				semantic_print_error(19, p -> lineno, cur -> name);
+				free(pfunc); free(s);
+				return ;
+			}
+			FieldList* af = a -> head;
+			FieldList* bf = pfunc -> head;
+			while((af != NULL) || (bf != NULL)){
+				if(((bf == NULL) && (af !=NULL)) || ((af == NULL) && (bf !=NULL))){
+					semantic_print_error(19, p -> lineno, cur -> name);
+					free(pfunc); free(s);
+					return ;
+				}
+				if(check(af -> type, bf -> type) != 0){
+					semantic_print_error(19, p -> lineno, cur -> name);
+					free(pfunc); free(s);
+					return ;
+				}
+				af = af -> tail;
+				bf = bf -> tail;
+			}
+			break;
+		}
+		cur = cur -> next;
+	}
+	SNode* temp = FunDeclarHead;
+	FunDeclarHead = s;
+	s -> next = temp;
+	return ;
+}
 void doFunDec(Node* p, Type* pt){
 	assert(p != NULL);
 	Node* ch = p->child[0];
@@ -176,6 +294,23 @@ void doFunDec(Node* p, Type* pt){
 	}
 	s -> Message.func = pfunc;
 	return ;
+}
+FieldList* doParamDecInDeclar(Node* p){
+	/* Hypothesis:
+	 * no matter ID, type counts */
+	Type* type = doSpecifier(p -> child[0]);
+	type = doVarDec(p -> child[1], type);
+	p = p -> child[1];
+	while(p -> childno != 1){
+		assert(p != NULL);
+		p = p -> child[0];
+	}
+	p = p -> child[0];
+	
+	FieldList* pff = (FieldList*)malloc(sizeof(FieldList));
+	strcpy(pff -> name, p -> String);
+	pff -> type = type;
+	return pff;
 }
 SNode* doParamDec(Node* p){
 	/* Hypothesis:
@@ -291,6 +426,7 @@ void doDecInCompSt(Node* p, Type* type){
 	else {
 		s = stInitNode(pvar -> String);
 		s -> visitedTag = VARIABLE;
+		s -> lineno = pvar -> lineno;
 		s -> Message.var = valtype;
 		stInsert(s);
 	}
@@ -377,9 +513,23 @@ Type* doExp(Node* p){
 			//ID LP RP which is a function
 			SNode* s = stFind(ch0 -> String);
 			if(s == NULL){
-				/* no def when use func */
-				semantic_print_error(2, p -> lineno, ch0 -> String);
-				finaltype = TypeNodeInt;
+				/* no def when use func 
+				 * check declar list*/
+				SNode* temp = FunDeclarHead;
+				while(temp != NULL){
+					if(strcmp(temp -> name, ch0 -> String) == 0)break;
+					temp = temp -> next;
+				}
+				if(temp != NULL){
+					if(doArgsWithDeclar(ch2, temp -> Message.declar) != 0){
+						semantic_print_error(9, p -> lineno, ch0 -> String);
+					}
+					finaltype = temp -> Message.declar -> returnType;
+				}
+				else {
+					semantic_print_error(2, p -> lineno, ch0 -> String);
+					finaltype = TypeNodeInt;
+				}
 			}
 			else if(s -> visitedTag != FUNC){
 				semantic_print_error(11, p -> lineno, ch0 -> String);
@@ -445,9 +595,23 @@ Type* doExp(Node* p){
 		if(ch0 -> type == ID){
 			SNode* s = stFind(ch0 -> String);
 			if(s == NULL){
-				/* no def when use func */
-				semantic_print_error(2, p -> lineno, ch0 -> String);
-				finaltype = TypeNodeInt;
+				/* no def when use func 
+				 * check declar list*/
+				SNode* temp = FunDeclarHead;
+				while(temp != NULL){
+					if(strcmp(temp -> name, ch0 -> String) == 0)break;
+					temp = temp -> next;
+				}
+				if(temp != NULL){
+					if(doArgsWithDeclar(ch2, temp -> Message.declar) != 0){
+						semantic_print_error(9, p -> lineno, ch0 -> String);
+					}
+					finaltype = temp -> Message.declar -> returnType;
+				}
+				else {
+					semantic_print_error(2, p -> lineno, ch0 -> String);
+					finaltype = TypeNodeInt;
+				}
 			}
 			else if(s -> visitedTag != FUNC){
 				semantic_print_error(11, p -> lineno, ch0 -> String);
@@ -479,6 +643,42 @@ Type* doExp(Node* p){
 	}
 	p -> exptype = finaltype;
 	return finaltype;
+}
+int doArgsWithDeclar(Node* p, Declarmsg* fm){
+	/* 1. num of args
+	 * 2. type of them
+	 */
+	int count = 1;
+	Node* temp = p;
+	while(temp -> childno == 3){
+		count ++;
+		temp = temp -> child[2];
+	}
+	if(count != fm -> no){
+		return -1;
+	}
+	FieldList* head = NULL;
+	while(p -> childno == 3){
+		FieldList* q = (FieldList*)malloc(sizeof(FieldList));
+		q -> type = doExp(p -> child[0]);
+		FieldList* tmp = head;
+		head = q;
+		q -> tail = tmp;
+		p = p -> child[2];
+	}
+	FieldList* q = (FieldList*)malloc(sizeof(FieldList));
+	q -> type = doExp(p -> child[0]);
+	FieldList* tmp = head;
+	head = q;
+	q -> tail = tmp;
+
+	FieldList* origin = fm -> head;
+	while(count --){
+		if(check(origin -> type, head -> type) != 0){
+			return -1;
+		}
+	}
+	return 0;
 }
 int doArgs(Node* p, Funcmsg* fm){
 	/* 1. num of args
@@ -634,6 +834,12 @@ void semantic_print_error(int no, int line, char* msg){
 			break;
 		case 17:
 			printf("Undefined structure \"%s\".", msg);
+			break;
+		case 18:
+			printf("Undefined function \"%s\".", msg);
+			break;
+		case 19:
+			printf("Inconsistent declaration of function \"%s\".", msg);
 			break;
 	}
 	printf("\n");
