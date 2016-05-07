@@ -1,0 +1,15 @@
+int a[3][3];
+
+int main() {
+	int i, s;
+	int N = 3;
+	a[0][0] = 31;
+
+	i = 0;
+	while(i < N) {
+		s = s + a[i][0];
+		i = i + 1;
+	}
+
+	return s;
+}

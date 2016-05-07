@@ -5,6 +5,12 @@ int main(){
 	return work(1, 2);
 }
 int work(int i, int j, float k){
+	if(3){
+		goto();
+	}
+	else {
+		e = 3;
+	}
 	return 0;
 }
 int f(float x){

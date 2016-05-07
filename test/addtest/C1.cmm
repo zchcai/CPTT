@@ -1,0 +1,13 @@
+struct ID{
+	int d;
+} i ;
+int main(){
+	struct newtype{
+		struct{
+			int a;
+		}o;
+	} SS;
+	i.d = 1;
+	SS.o.a = 2 + i.d;
+	return SS.o.a;
+}

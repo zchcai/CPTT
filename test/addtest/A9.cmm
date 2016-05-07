@@ -1,0 +1,12 @@
+int method_1(int arg)
+{
+	int a;
+	a = arg + 5;
+	return a;
+}
+
+int method_2)
+{
+	int b = 2, c;
+	c = method_1(b);
+}

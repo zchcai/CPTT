@@ -1,0 +1,6 @@
+int test_for_wrong_dec_number()
+{
+	int _wrong_dec_number_ = 001926;
+	int _correct_dhex_number_ = 0x096FE;
+
+}

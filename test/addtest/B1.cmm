@@ -1,0 +1,27 @@
+struct vector1 {
+	int array[100];
+} d;
+
+struct vector1 test_function(struct vector1 a) {
+	return a;
+}
+
+int main() {
+	int N = 100;
+	int i = 0;
+	stuct vector t;
+	while(i < N) {
+		d.array[i] = i + 128;
+		i = i + 1;
+	}
+
+	t = test_function(d));
+
+	i = 0,
+	  while(i < N) {
+		  t.array[i+4] = 0;
+		  i = i + 1;
+	  }
+
+	return 0;
+}

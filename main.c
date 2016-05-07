@@ -38,9 +38,10 @@ int main(int argc, char** argv) {
 	yyrestart(f);
 	yyparse();
 	if((lex_error == 0) && (syntax_error == 0)){
-		/* Only Lab1 use this 
-		 * print_node(Head, 0);
+		/* Only Lab1 use this */
+		print_node(Head, 0);
 
+		/*
 		 * When no lexical and syntax error,
 		 * we start semantic analysis. 
 		 */

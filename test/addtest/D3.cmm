@@ -1,0 +1,23 @@
+/*
+**This is a test for comments
+/\\\\\\\\\\\\\\\\\\\/
+/
+*/
+int /*/**\function\*/max(int a, //int y) {//parameters: a,b
+int /*z*/ b){
+		int z;
+		/*****
+		int z = a;
+		****\*/
+		if(a > b) {/*{
+				z = 1; a = 3;
+		b = a * 2;/*} \\\
+		\\
+		*/ z = a;
+		}
+		else { //b > a comments*//\\//*
+			//\\*//\\*//\\//*//\\*//\\
+			z = b;
+		}
+		return z/*ends\/\/\/\/\/\/*/;
+}

@@ -1,0 +1,31 @@
+/*
+* This is a test for comments
+*/
+int cube(int n) { //cube function
+	return n /*\*/* n /**\2*/* n;
+}
+
+int main() {
+	int n, n2,/**/ n1, n0//\//*/;
+	n = 100;
+	while(n < 1000) {
+		n2 = n / 100;
+		n1 = (n / 10) + 10;
+		n0 = n + 10;
+		/*This is a comment.\
+		/\//\/******\/cube\/\/\/
+		if(n == cube(n0)) {
+		put_int(n);
+		}
+		*/
+		if(n == cube(n2) + cube(n1) + cube(n0)) {
+			//put_int(n);\\*/;
+			put_int(/*m+*/n);
+		/*\}*\/*
+		}*/
+		}
+		n /*_1*/= n + 1;
+	}
+	return 0;
+}
+/**end of function~

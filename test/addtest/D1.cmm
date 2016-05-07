@@ -1,0 +1,7 @@
+int oct_dec_dhex_func_test()
+{
+	int _oct_number = 512;
+	int _dec_number = 0127;
+	int _dhex_number = 0XAdF0;
+	int _result_number = - dhex + oct * ( dec - 0X000F );
+}

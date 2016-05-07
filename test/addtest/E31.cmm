@@ -1,0 +1,18 @@
+/*
+This is a test for comments./*
+////\\\\////\\\\////\\\\* / * / * /
+*/
+
+int main() {
+	int i = 1,//\/*/\/\/\/\/\/\/\/ i = i +1;
+	sum = 0;
+	while(i /*>=<*/ <= 100) {
+		sum /*/ ~~ */= sum + i;
+		i = i + 1;
+	}
+
+	put_int(sum); // assert(sum == ?);
+
+	return /*-1;*/0;
+}
+/* end of function/*\*/

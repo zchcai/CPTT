@@ -1,0 +1,7 @@
+float function()
+{
+	float _a_ = 0.23e-1;
+	float b = 1.69e.-1;
+	float c_ = e-;
+	return _a + b + c_;
+}
