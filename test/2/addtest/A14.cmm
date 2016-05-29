@@ -1,0 +1,16 @@
+struct _Vector_1 {
+	float x, y;
+};
+struct _Vector_2 {
+	float a, b, c;
+};
+
+int main()
+{
+	struct _Vector_1 v1;
+	struct _Vector_2 v2;
+	float p,q;
+	p = v1.x + v1.y * v1.z;
+	q = v2.a + v2.b * v2.c;
+	return 0;
+}

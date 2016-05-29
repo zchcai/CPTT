@@ -1,0 +1,17 @@
+int multiple_function(int len)
+{
+	int array[10];
+	int result = 1;
+	int i = 0;
+	while(i < 10){
+		result = result * array[i];
+		i = i + 1;
+	}
+	return result;
+}
+
+int main()
+{
+	int t = multiple_function(5);
+	t(5);
+}

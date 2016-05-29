@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	yyparse();
 	if((lex_error == 0) && (syntax_error == 0)){
 		/* Only Lab1 use this */
-		print_node(Head, 0);
+		//print_node(Head, 0);
 
 		/*
 		 * When no lexical and syntax error,
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 		dfs(Head);
 		DeclarAndDefine();
 		/* for test in lab2 */
-		// stPrint();
+		//stPrint();
 	}
 	return 0;
 }

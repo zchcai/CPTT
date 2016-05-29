@@ -1,0 +1,36 @@
+struct DepartmentGuest{
+	int ageG;
+	int isMaleG;
+	int EQG;
+	int scoreG[5];
+};
+struct DepartmentOwner{
+	int ageO;
+	int isMaleO;
+}owner;
+
+int guestComparison(struct DepartmentGuest guest_a,struct DepartmentGuest guest_b){
+	int result = 0;
+	if(guest_a.ageG > guest_b.ageG)
+		result = guest_a.ageG - guest_b.ageG;
+
+	if(guest_a.EQG > guest_b.EQG)
+		result = result * 2;
+	return result - owner.ageO;
+}
+
+int totalEQ(struct DepartmentGuest guest_a, struct DepartmentGuest guest_b){
+	return guest_a.EQG + guest_b.EQG;
+}
+int main(){
+	struct DepartmentGuest guest1, guest2;
+	int i = 0;
+	int result = 0;
+	while(i<5){
+		result = result + guest1.scoreG[i] + guest2.scoreG[i];
+		i = i + 1;
+	}
+
+	return result + totalEQ(guest1,guest2) + guestComparison(guest1, guest2);
+
+}

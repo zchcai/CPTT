@@ -1,0 +1,17 @@
+int returnSmallerOne(int x, int y)
+{
+	if(x >= y)
+		return y;
+	else
+		return x;
+}
+
+int main()
+{
+	int min = 14;
+	int a = 12, b = 15;
+	if( returnSmallerOne(a, b) < min)
+		min = returnSmallerOne(a, b);
+	else
+		returnSmallerOne(a, b) = min;
+}

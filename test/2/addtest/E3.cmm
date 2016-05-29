@@ -1,0 +1,31 @@
+struct Vector1{
+	int a1;
+	int b1;
+};
+struct Vector2{
+	int a2;
+	int b2;
+};
+struct Vector3{
+	int a3[5];
+	float b3[2][1];
+};
+struct Vector4{
+	int a4[6];
+	float b4[5][1];
+};
+struct Vector5{
+	int a5[6];
+	float b5[5];
+};
+int main(){
+	struct Vector1 v1;
+	struct Vector2 v2;
+	struct Vector3 v3;
+	struct Vector4 v4;
+	struct Vector5 v5;
+	v1 = v2;
+	v2 = v3;
+	v3 = v4;
+	v4 = v5;
+}

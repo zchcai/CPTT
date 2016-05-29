@@ -1,0 +1,15 @@
+struct Food_purchase {
+	int price, weight;
+};
+struct Drink_purchase {
+	int sweet;
+	int price2;
+};
+
+int main()
+{
+	struct Food_purchase meat;
+	struct Food_purchase2 vegetable;
+	struct Drink_purchase orange;
+	return 0;
+}

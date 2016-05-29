@@ -1,0 +1,56 @@
+struct Triangle{
+	int edge1;
+	int edge2;
+	int edge3;
+};
+
+struct Circle{
+	int r;
+};
+
+struct Rectangle{
+	int long_edge;
+	int short_edge;
+};
+struct Triangle setTriangle(int a,int b, int c){
+	struct Triangle triangle_set;
+	triangle_set.edge1 = a;
+	triangle_set.edge2 = b;
+	triangle_set.edge3 = c;
+	return triangle_set;
+}
+struct Circle setCircle(int d){
+	struct Circle circle_set;
+	circle_set.r = d;
+	return circle_set;
+}
+struct Rectangle setRectangle(int l, int s){
+	struct Rectangle rectangle_set;
+	rectangle_set.long_edge = l;
+	rectangle_set.short_edge = s;
+	return rectangle_set;
+}
+int compareReturnShortest(struct Triangle triangle, struct Circle circle, struct Rectangle rectangle){
+	int perimeter1 = triangle.edge1 + triangle.edge2 + triangle.edge3;
+	int perimeter2 = circle.r * 3 * 2;
+	int perimeter3 = 2 * (rectangle.long_edge + rectangle.short_edge);
+	if(perimeter1 < perimeter2){
+		if(perimeter1 <= perimeter3)
+			return 1;
+		else return 3;
+	}
+	else {
+		if(perimeter2 <=perimeter3)
+			return 2;
+		else return 3;
+	}
+	return -1;
+}
+
+int main(){
+	struct Triangle temp1 = setTriangle(3,4,5);
+	struct Circle temp2 = setCircle(2);
+	struct Rectangle temp3= setRectangle(3,4);
+	return compareReturnShortest(temp1,temp2,temp3);
+
+}

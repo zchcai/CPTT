@@ -1,0 +1,16 @@
+struct Vector{
+	float x;
+	float y;
+	float z;
+};
+int structMutipleFunction(struct Vector A, struct Vector B)
+{
+	float c = A.x * B.x + A.y * B.y + A.z * B.z;
+	return c;
+}
+
+float structAddFunction(struct Vector A1)
+{
+	float c1 = A1.x + A1.y + A1.z;
+	return c1;
+}

@@ -1,0 +1,15 @@
+struct Vector {
+	int x, y;
+	float array[5];
+};
+
+int main()
+{
+	struct Vector A;
+	float array1[10],b;
+	A.x = 12;
+	A.y = 13;
+
+	b = A.array[2];
+	array1[1] = A.array[2] * 2;
+}

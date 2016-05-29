@@ -1,0 +1,28 @@
+struct Array_Vector{
+	int length;
+	int array[100];
+};
+struct {
+	int len;
+	int array2[5];
+}vector_define;
+
+int main(){
+	struct Array_Vector vector_array;
+	int i, j;
+	vector_array.length = 100;
+	i = 0;
+	while(i<vector_array.length){
+		if(i<vector_define.len)
+			vector_array.array[i] = vector_define.array2[i];
+		else
+			vector_array.array[i] = i * i + 1;
+		i = i + 1;
+	}
+	j = 0;
+	while(j<vector_define.len){
+		vector_define.array2[i] = j * 2 + 1;
+		vector_define.array2[i] = vector_define.array2[i] * j;
+	}
+
+}

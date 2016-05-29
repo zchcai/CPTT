@@ -1,0 +1,26 @@
+struct name {
+	int z;
+}name1;
+
+struct Vector {
+	int x;
+	int y;
+};
+
+int main()
+{
+	struct Vector vector;
+	int name = vector.x;
+
+	vector.x = 2;
+	name1.z = 5;
+
+	vector.y = name1.z;
+
+	if(vector.y==5){
+		vector.y = name1.z;
+	}
+
+
+	return 0;
+}

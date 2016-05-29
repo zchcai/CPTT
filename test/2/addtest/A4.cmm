@@ -1,0 +1,14 @@
+int math_function(int a, int b, int c){
+	int result = a + b + c;
+	return result;
+}
+
+int math_function(int a1, int b1){
+	int result1 = a1 + b1 * a1;
+	return result1;
+}
+
+int main()
+{
+	return math_function(5,4,7);
+}

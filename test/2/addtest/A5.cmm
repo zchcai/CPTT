@@ -1,0 +1,19 @@
+struct Food {
+	int type;
+	int weight;
+	float price;
+};
+
+struct Purchase{
+	struct Food food;
+	int time;
+	int sum;
+};
+
+int main(){
+	struct Food a;
+	struct Purchase b;
+	b.food = a;
+	b.time = 13;
+	b.sum = a;
+}

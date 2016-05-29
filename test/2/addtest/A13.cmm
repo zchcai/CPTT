@@ -1,0 +1,10 @@
+struct {
+	int a;
+	int b;
+} v;
+int test_function()
+{
+	int temp = 2;
+	v.a = temp + v.b * v.a;
+	v.b = temp.b;
+}
