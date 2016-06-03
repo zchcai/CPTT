@@ -1,6 +1,9 @@
 #include <stdlib.h>
 extern SNode* SHead;
 extern Type* TypeNodeInt;
+void intermediate_code_generation(){
+	//TODO
+}
 void add_read_write(){
 	SNode* pr = stInitNode("read");
 	SNode* pw = stInitNode("write");

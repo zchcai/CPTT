@@ -29,6 +29,7 @@ void DeclarAndDefine();
 Type* doVarDec(Node*, Type*);
 void semantic_print_error(int no, int line, char* msg);
 void semantic_error(int no, int line);
+int semantic_error_no;
 int main(int argc, char** argv) {
 	if (argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
@@ -39,22 +40,30 @@ int main(int argc, char** argv) {
 	yyrestart(f);
 	yyparse();
 	if((lex_error == 0) && (syntax_error == 0)){
-		/* Only Lab1 use this */
-		//print_node(Head, 0);
-
+		/* Only Lab1 use this:
+		 * print_node(Head, 0);
+		 * */
 		/*
 		 * When no lexical and syntax error,
 		 * we start semantic analysis. 
 		 */
 		add_read_write();//for lab3 and then no error with read&write
+		semantic_error_no = 0;
 		dfs(Head);
 		DeclarAndDefine();
-		/* for test in lab2 */
-		stPrint();
+		if(semantic_error_no == 0){
 		/*
 		 * when no semantic error,
 		 * start intercode generation
 		 */
+			intermediate_code_generation();
+		}
+		else{
+			/* print info for debug */
+			printf("Syntax Tree:\n");
+			print_node(Head, 0);
+			stPrint();
+		}
 	}
 	return 0;
 }
@@ -810,6 +819,7 @@ FieldList* doDecInStruct(Node* p, Type* valtype){
 	return pf;
 }
 void semantic_print_error(int no, int line, char* msg){
+	semantic_error_no ++;
 	printf("Error type %d at Line %d: ", no, line);
 	switch(no){
 		case 1:
@@ -852,6 +862,7 @@ void semantic_print_error(int no, int line, char* msg){
 	printf("\n");
 }
 void semantic_error(int no, int line){
+	semantic_error_no ++;
 	printf("Error type %d at Line %d: ", no, line);
 	switch(no){
 		case 5:
