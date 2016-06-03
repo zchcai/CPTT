@@ -3,6 +3,7 @@
 #include "syntax.tab.h"
 #include "tree.h"
 #include "symbol.c"
+#include "intercode.c"
 extern int lex_error, syntax_error;
 extern Node* Head;
 extern SNode* SHead;
@@ -45,10 +46,15 @@ int main(int argc, char** argv) {
 		 * When no lexical and syntax error,
 		 * we start semantic analysis. 
 		 */
+		add_read_write();//for lab3 and then no error with read&write
 		dfs(Head);
 		DeclarAndDefine();
 		/* for test in lab2 */
-		//stPrint();
+		stPrint();
+		/*
+		 * when no semantic error,
+		 * start intercode generation
+		 */
 	}
 	return 0;
 }

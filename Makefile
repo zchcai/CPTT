@@ -5,8 +5,9 @@ FLEX	= lexical.l
 SYN	= syntax.y
 FLEX_C	= lex.yy.c
 SYMBOL_SOURCE = symbol.c symbol.h
-parser	: $(FLEX_C) $(SYMBOL_SOURCE) syntax.tab.c main.c
-	gcc main.c syntax.tab.c -ll -lfl -ly -o parser 
+OTHER_C_SOURCE = syntax.tab.c main.c intercode.c
+parser	: $(FLEX_C) $(SYMBOL_SOURCE) $(OTHER_C_SOURCE) 
+	gcc syntax.tab.c main.c -ll -lfl -ly -o parser 
 
 $(FLEX_C) : $(FLEX)
 	flex $(FLEX)
