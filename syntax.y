@@ -158,9 +158,6 @@ Node* create_node(int type, int n, ...){
 	va_start(vl, n);
 	for(i = 0; i < n; i++){
 		val = va_arg(vl, Node*);
-		switch(val -> type){
-			default: break;
-		}
 		val -> parent = p;
 		p -> child[i] = val;
 	}
@@ -198,7 +195,7 @@ yyerror(char* msg) {
 	fprintf(stdout, "Error type B at Line %d: %s.\n",yylineno, msg);
 }
 char* type2name(int type){
-switch(type){
+  switch(type){
 	case Program: return "Program";
 	case ExtDefList: return "ExtDefList";
 	case ExtDef: return "ExtDef";
@@ -226,12 +223,12 @@ switch(type){
 	case TYPE: return "TYPE";
 	case SEMI: return "SEMI";
 	case COMMA: return "COMMA";
-	case GT: return "GT";
-	case LT: return "LT";
-	case GE: return "GE";
-	case LE: return "LE";
-	case EQ: return "EQ";
-	case NE : return "NE";
+	case GT: return ">";
+	case LT: return "<";
+	case GE: return ">=";
+	case LE: return "<=";
+	case EQ: return "==";
+	case NE : return "!=";
 	case LC: return "LC";
 	case RC: return "RC";
 	case STRUCT: return "STRUCT";

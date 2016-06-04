@@ -5,4 +5,5 @@ parser
 lex.yy.c
 *.tab.c
 *.tab.h
+*.ir
 log

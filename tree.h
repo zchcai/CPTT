@@ -12,4 +12,4 @@ typedef struct TreeNode{
 }Node;
 /* declared non-terminals in some type */
 	enum nonTer{Program = 300, ExtDefList = 301, ExtDef, ExtDecList, Specifier, FunDec, CompSt, VarDec, StructSpecifier, OptTag, DefList, Tag, VarList, ParamDec, StmtList, Stmt, Exp, Def, DecList, Dec, Args};
-	enum relopType{GT = 400, LT = 401, GE, LE, EQ, NE};
+	enum relopType{GT = 400, LT = 401, GE = 402, LE = 403, EQ = 404, NE = 405};
