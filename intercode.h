@@ -8,7 +8,7 @@ typedef struct OperandStruct{
 }Operand;
 
 typedef struct InterMediateCode{
-	enum{ LABEL, FUNCTION_3, ASSIGN_ORIGIN, ADD_3, SUB_3, MUL_3, DIV_3, ASSIGN_ADDRESS_TO, ASSIGN_VALUE_FROM, ASSIGN_TO_ADDRESS, GOTO, IFGOTO, RETURN_3, DEC, ARG, CALLFUNC, PARAM, READ, WRITE}kind;
+	enum{LABEL, FUNCTION_3, ASSIGN_ORIGIN, ADD_3, SUB_3, MUL_3, DIV_3, ASSIGN_ADDRESS_TO, ASSIGN_VALUE_FROM, ASSIGN_TO_ADDRESS, GOTO, IFGOTO, RETURN_3, DEC, ARG, CALLFUNC, PARAM, READ, WRITE, BLANKLINE}kind;
 	union{
 		struct{struct OperandStruct *left, *right;}assign;
 		struct{struct OperandStruct *result, *op1, *op2;}binop;
@@ -35,3 +35,11 @@ typedef struct InterCodeListNode{
 	struct InterMediateCode* code;
 	struct InterCodeListNode *prev, *next;
 }InterCodes;
+
+void print_intercodes(InterCodes*);
+void print_intercode(InterCode*);
+void print_operand(Operand*);
+InterCodes* codesJoin(InterCodes*, InterCodes*);
+InterCodes* codesInit(int k, int n, ...);
+void test_intercodes_data_structure();
+Operand* opInit(int, int);

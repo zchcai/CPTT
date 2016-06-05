@@ -1,36 +1,41 @@
 #include <stdarg.h>
+#include <string.h>
 #include <stdlib.h>
-#include "intercode.h"
+#include "translate.c"
 extern Node* Head;
 extern SNode* SHead;
 extern Type* TypeNodeInt;
 void print_intercodes(InterCodes*);
 void print_intercode(InterCode*);
 void print_operand(Operand*);
-InterCodes* codesInit(InterCode*);
 InterCodes* codesJoin(InterCodes*, InterCodes*);
-InterCode* codeInit(int k, int n, ...);
+InterCodes* codesInit(int k, int n, ...);
 Operand* opInit(int, int);
-void test(){
+void test_intercodes_data_structure();
+void test_intercodes_data_structure(){
+	/* for data structure testing */
 	Operand* op1 = opInit(ADDRESS, 1);
 	Operand* op2 = opInit(VARIABLE_3, 1);
 	Operand* op4 = opInit(VARIABLE_3, 2);
 	Operand* op3 = opInit(CONSTANT, 6);
 	SNode* stnode = stInitNode("main");
-	InterCodes* code0 = codesInit(codeInit(FUNCTION_3, 1, stnode));
-	InterCodes* code1 = codesInit(codeInit(LABEL, 1, op1));
-	InterCodes* code2 = codesInit(codeInit(READ, 1, op2));
-	InterCodes* code3 = codesInit(codeInit(RETURN_3, 1, op2));
-	InterCodes* code4 = codesInit(codeInit(IFGOTO, 4, op2, GT, op3, op1));
-	InterCodes* code5 = codesInit(codeInit(DEC, 2, op4, 80));
+	InterCodes* code0 = codesInit(FUNCTION_3, 1, stnode);
+	InterCodes* code1 = codesInit(LABEL, 1, op1);
+	InterCodes* code2 = codesInit(BLANKLINE, 0);
+	InterCodes* code3 = codesInit(RETURN_3, 1, op2);
+	InterCodes* code4 = codesInit(IFGOTO, 4, op2, GT, op3, op1);
+	InterCodes* code5 = codesInit(DEC, 2, op4, 80);
 	code0 = codesJoin(code0, code1);
 	code2 = codesJoin(code2, code3);
 	code4 = codesJoin(code4, code5);
 	print_intercodes(codesJoin(codesJoin(code0, code2), code4));
 }
 void intermediate_code_generation(){
-	test();
-	//TODO
+	//test_intercodes_data_structure();
+	//return ;
+	Node* root = Head;
+	InterCodes* code = translate(root);
+	print_intercodes(code);
 }
 void add_read_write(){
 	SNode* pr = stInitNode("read");
@@ -135,7 +140,17 @@ void print_intercode(InterCode* p){
 	else if(k == IFGOTO){
 		printf("IF ");
 		print_operand(p -> u.ifgoto.rel1);
-		printf(" %s ", type2name(p -> u.ifgoto.reltype));
+		char* s = (char*)malloc(4 * sizeof(char));
+		memset(s, 0, sizeof(s));
+		switch(p -> u.ifgoto.reltype){
+			case GT: strcpy(s, ">");break;
+			case LT: strcpy(s, "<");break;
+			case GE: strcpy(s, ">=");break;
+			case LE: strcpy(s, "<=");break;
+			case EQ: strcpy(s, "==");break;
+			case NE : strcpy(s, "!=");break;
+		}
+		printf(" %s ", s);
 		print_operand(p -> u.ifgoto.rel2);
 		printf(" GOTO ");
 		print_operand(p -> u.ifgoto.go);
@@ -176,6 +191,10 @@ void print_intercode(InterCode* p){
 		printf("WRITE ");
 		print_operand(p -> u.one.op);
 	}
+	/* [\n] */
+	else if(k == BLANKLINE){
+		/* nothing */
+	}
 	printf("\n");
 }	
 void print_operand(Operand* p){
@@ -191,26 +210,27 @@ void print_operand(Operand* p){
 	}
 	return ;
 }
-InterCodes* codesInit(InterCode* code){
-	InterCodes* p = (InterCodes*)malloc(sizeof(InterCodes));
-	if(p == NULL)return NULL;
-	p -> code = code;
-	p -> prev = p;
-	p -> next = p;
-	return p;
-}
 InterCodes* codesJoin(InterCodes* headx, InterCodes* heady){
+	if(headx == NULL)return heady;
+	if(heady == NULL)return headx;
 	InterCodes* xtail = headx -> prev;
 	InterCodes* ytail = heady -> prev;
 	headx -> prev = ytail;	ytail -> next = headx;
 	xtail -> next = heady;	heady -> prev = xtail;
 	return headx;
 }
-InterCode* codeInit(int k, int n, ...){
+InterCodes* codesInit(int k, int n, ...){
 	int i;
+	InterCodes* codes = (InterCodes*)malloc(sizeof(InterCodes));
+	assert(codes != NULL);
+
 	InterCode* p = (InterCode*)malloc(sizeof(InterCode));
-	if(p == NULL)return NULL;
+	assert(p != NULL);
 	p -> kind = k;
+	codes -> code = p;
+	codes -> prev = codes;
+	codes -> next = codes;
+	if(k == BLANKLINE)return codes;
 	va_list vl;
 	va_start(vl, n);
 	/* LABEL x : */
@@ -263,7 +283,7 @@ InterCode* codeInit(int k, int n, ...){
 	
 	va_end(vl);
 
-	return p;
+	return codes;
 }
 Operand* opInit(int k, int var){
 	Operand* p = (Operand*)malloc(sizeof(Operand));
