@@ -1,10 +1,18 @@
-int work(int i, int j, int k){
-	int ii = 0;
-	write(i+j+k);
-	ii = 1 + 1;
-	return i+j+k;
+int work(int x, int j, int k){
+	int y = 0;
+	write(x+j+k);
+	y = x + 1;
+	return x+j+k;
 }
 int main(){
-	write(9);
-	return work(1, 2, 3);
+	int a[10];
+	int b[4];
+	int i = 0;
+	b[2] = 100;
+	while(i < 10){
+		a[i] = i;
+		write(a[i]);
+		i = i + 1;
+	}
+	return work(a[1], b[2], a[4]);
 }

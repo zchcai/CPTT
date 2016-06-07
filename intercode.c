@@ -7,6 +7,8 @@ extern SNode* SHead;
 extern Type* TypeNodeInt;
 Operand OperandZero= {.kind = CONSTANT, .u.var_int = 0};
 Operand OperandOne= {.kind = CONSTANT, .u.var_int = 1};
+Operand OperandFour= {.kind = CONSTANT, .u.var_int = 4};
+Operand* OperandNodeFour = &OperandFour;
 Operand* OperandNodeZero = &OperandZero;
 Operand* OperandNodeOne = &OperandOne;
 void print_intercodes(InterCodes*);
@@ -18,7 +20,7 @@ Operand* opInit(int, int);
 void test_intercodes_data_structure();
 void test_intercodes_data_structure(){
 	/* for data structure testing */
-	Operand* op1 = opInit(ADDRESS, 1);
+	Operand* op1 = opInit(LABELADDRESS, 1);
 	Operand* op2 = opInit(VARIABLE_3, 1);
 	Operand* op4 = opInit(VARIABLE_3, 2);
 	Operand* op3 = opInit(CONSTANT, 6);
@@ -212,8 +214,11 @@ void print_operand(Operand* p){
 	else if(p -> kind == CONSTANT){
 		printf("#%d", p -> u.var_int);
 	}
-	else if(p -> kind == ADDRESS){
+	else if(p -> kind == LABELADDRESS){
 		printf("label%d", p -> u.var_no);
+	}
+	else if(p -> kind == ADDRESS){
+		//TODO
 	}
 	return ;
 }
@@ -296,12 +301,15 @@ Operand* opInit(int k, int var){
 	Operand* p = (Operand*)malloc(sizeof(Operand));
 	assert(p != NULL);
 	p -> kind = k;
-	if(k == VARIABLE_3 || k == ADDRESS || k == TEMPVAR){
+	if(k == VARIABLE_3 || k == LABELADDRESS || k == TEMPVAR){
 		assert(var != 0);
 		p -> u.var_no = var;
 	}
 	else if(k == CONSTANT){
 		p -> u.var_int = var;
+	}
+	else if(k == ADDRESS){
+		//TODO
 	}
 	return p;
 }

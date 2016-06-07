@@ -1,8 +1,9 @@
 typedef struct OperandStruct{
-	enum{ VARIABLE_3, CONSTANT, ADDRESS, TEMPVAR}kind;
+	enum{ VARIABLE_3, CONSTANT, LABELADDRESS, ADDRESS, TEMPVAR}kind;
 	union{
 		int var_no;
 		int var_int;
+		int addr;
 		/* In Lab3, float won't appear */
 	}u;
 }Operand;

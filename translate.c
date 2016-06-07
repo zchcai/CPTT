@@ -2,10 +2,12 @@
 InterCodes* translate_Args(Node* p);
 InterCodes* translate_Exp(Node*, Operand*);
 InterCodes* translate_Cond(Node*, Operand*, Operand*);
+extern Type* TypeNodeInt;
 extern Operand* OperandNodeZero;
 extern Operand* OperandNodeOne;
+extern Operand* OperandNodeFour;
 SNode* fnode = NULL;
-int temp_var_no = 0, address_no = 0, st_var_no = 0;
+int temp_var_no = 0, label_address_no = 0, st_var_no = 0;
 int new_var(){
 	st_var_no ++ ;
 	return st_var_no;
@@ -15,11 +17,10 @@ Operand* new_temp(){
 	return opInit(TEMPVAR, temp_var_no);
 }
 Operand* new_label(){
-	address_no ++;
-	return opInit(ADDRESS, address_no);
+	label_address_no ++;
+	return opInit(LABELADDRESS, label_address_no);
 }
 InterCodes* translate_Args(Node* p){
-	//printf("enter into translate_Args:\n");
 	assert(p != NULL);
 	int childno = p -> childno;
 	Node* child[4];
@@ -29,6 +30,7 @@ InterCodes* translate_Args(Node* p){
 	}
 	Operand* t1 = new_temp();
 	InterCodes* code1 = translate_Exp(child[0], t1);
+	//TODO 3.2.a 3.1.b
 	InterCodes* code2 = codesInit(ARG, 1, t1);
 	if(childno == 1){
 		return codesJoin(code1, code2);
@@ -83,11 +85,10 @@ InterCodes* translate_Exp(Node* p, Operand* place){
 		InterCodes* code2 = codesInit(SUB_3, 3, place, OperandNodeZero, t1);
 		return codesJoin(code1, code2);
 	}
-	/* NOT Exp 
-	 * Exp RELOP Exp
-	 * Exp AND Exp
-	 * Exp OR
-	 * */
+	/* NOT Exp */
+	/* Exp RELOP Exp */
+	/* Exp AND Exp */
+	/* Exp OR */
 	else if(child[0] -> type == NOT || (childno == 3 && (child[1] -> type == RELOP || child[1] -> type == AND || child[1] -> type == OR))){
 		Operand* label1 = new_label();
 		Operand* label2 = new_label();
@@ -98,11 +99,10 @@ InterCodes* translate_Exp(Node* p, Operand* place){
 		code2 = codesJoin(code2, codesInit(LABEL, 1, label2));
 		return codesJoin(code0 ,code2);
 	}
-	/* Exp PLUS Exp
-	 * Exp MINUS Exp
-	 * Exp STAR Exp
-	 * Exp DIV Exp
-	 * */
+	/* Exp PLUS Exp */
+	/* Exp MINUS Exp */
+	/* Exp STAR Exp */
+	/* Exp DIV Exp */
 	else if(childno == 3 && (child[1] -> type == PLUS || child[1] -> type == MINUS || child[1] -> type == STAR || child[1] -> type == DIV)){
 		Operand* t1 = new_temp();
 		Operand* t2 = new_temp();
@@ -126,22 +126,50 @@ InterCodes* translate_Exp(Node* p, Operand* place){
 	}
 	else if(childno == 3 && child[1] -> type == ASSIGNOP){
 		Node* ch = child[0] -> child[0];
+		int leftchildno = child[0] -> childno;
+		Operand* right = new_temp();
+		InterCodes*	calc_right = translate_Exp(child[2], right);
+		Operand* left = NULL;
+		InterCodes* assign = NULL;
 		if(ch -> type == ID){
 			SNode* vnode = stFind(ch -> String);
-			//printf("%s\t%d\n", vnode -> name, vnode -> op_var_no);
-			//printf("b\n");
-			Operand* v1 = opInit(VARIABLE_3, vnode -> op_var_no);
+			left = opInit(VARIABLE_3, vnode -> op_var_no);
+			assign = codesInit(ASSIGN_ORIGIN, 2, left, right);
+		}
+		else if(leftchildno == 4 && ch -> type == Exp){
+			Node* chch = ch -> child[0];
+
+			assert(chch -> type == ID);//TODO 3.2.b
+
+			SNode* stnode = stFind(chch -> String);
+			left = opInit(VARIABLE_3, stnode -> op_var_no);
+			Type* vtype = stnode -> Message.var;
+
+			assert(vtype -> u.array.elem == TypeNodeInt);
+
 			Operand* t1 = new_temp();
-			InterCodes* code1 = translate_Exp(child[2], t1);
-			InterCodes* code2 = codesInit(ASSIGN_ORIGIN, 2, v1, t1);
-			if(place != NULL)code2 = codesJoin(code2, codesInit(ASSIGN_ORIGIN, 2, place, v1));
-			return codesJoin(code1, code2);
+			Operand* t2 = new_temp();
+
+			InterCodes* code[5];
+			code[0] = translate_Exp(child[0] -> child[2], t1);
+			code[1] = codesInit(MUL_3, 3, t1, t1, OperandNodeFour);
+			code[2] = codesInit(ASSIGN_ADDRESS_TO, 2, t2, left);
+			code[3] = codesInit(ADD_3, 3, t2, t2, t1);
+			code[4] = codesInit(ASSIGN_TO_ADDRESS, 2, t2, right);
+			int i;
+			for(i = 0; i < 5; i++){
+				assign = codesJoin(assign, code[i]);
+			}
 		}
 		else{
-			//TODO
+			//TODO 3.1.a 3.2.b
+			//now one-dim var
+			
 			printf("error\n");
 			assert(0);
 		}
+		if(place != NULL)assign = codesJoin(assign, codesInit(ASSIGN_ORIGIN, 2, place, right));
+		return codesJoin(calc_right, assign);
 	}
 	/* ID LP Args RP */
 	else if(childno == 4 && child[0] -> type == ID){
@@ -167,12 +195,45 @@ InterCodes* translate_Exp(Node* p, Operand* place){
 			return codesInit(CALLFUNC, 2, place, fnode);
 		}
 	}
+	/* Exp LB Exp RB */
+	else if(childno == 4 && child[1] -> type == LB){
+		Node* ch = child[0] -> child[0];
+		if(ch -> type == ID){
+			SNode* stnode = stFind(ch -> String);
+			int no = stnode -> op_var_no;
+			Type* vtype = stnode -> Message.var;
+
+			assert(vtype -> u.array.elem == TypeNodeInt);
+
+			Operand* t1 = new_temp();
+			Operand* t2 = new_temp();
+			Operand* v1 = opInit(VARIABLE_3, no);
+			InterCodes* code[5];
+			code[0] = translate_Exp(child[2], t1);
+			code[1] = codesInit(ASSIGN_ADDRESS_TO, 2, t2, v1);
+			code[2] = codesInit(MUL_3, 3, t1, t1, OperandNodeFour);
+			code[3] = codesInit(ADD_3, 3, t2, t2, t1);
+			code[4] = codesInit(ASSIGN_VALUE_FROM, 2, place, t2);
+			int i;
+			for(i = 1; i < 5; i++){
+				code[0] = codesJoin(code[0], code[i]);
+			}
+			return code[0];
+		}
+		else {
+			//TODO 3.2
+			printf("Cannot translate: Code contains variables of multi-dimensional array type.\n");
+			assert(0);
+		}
+	}
 	else {
+	/* Exp DOT ID */
+		printf("chlidno = %d\n", childno);
+		//TODO 3.1
 		printf("error\n");
 		assert(0);
 	}
-	 /* Exp DOT ID
-	 * Exp LB Exp RB */
+	
 }
 InterCodes* translate_Cond(Node* p, Operand* label_true, Operand* label_false){
 	//printf("enter into translate_Cond:\n");
@@ -324,9 +385,23 @@ InterCodes* translate(Node* p){
 			SNode* vnode = stFind(varp -> String);
 			assert(vnode != NULL);
 			vnode -> op_var_no = new_var();
+			Type* vartype = vnode -> Message.var;
+			if(vartype -> kind == ARRAY){
+				//TODO 3.2.b
+				//now: use size = 4;
+				int size = 4 * vartype -> u.array.size;
+				Operand* v1 = opInit(VARIABLE_3, vnode -> op_var_no);
+				InterCodes* code1 = codesInit(DEC, 2, v1, size);
+				return code1;
+			}
+			else if(vartype -> kind == STRUCTURE){
+				//TODO 3.1
+				printf("error\n");
+				assert(0);
+			}
 
-			/* if it has initialization */
-			if(childno == 3){
+			/* if basic type has initialization */
+			else if(vartype -> kind == BASIC && childno == 3){
 				//TODO: without consideration of structure or array
 				Operand* t1 = new_temp();
 				InterCodes* code1 = translate_Exp(child[2], t1);
@@ -389,13 +464,18 @@ InterCodes* translate(Node* p){
 				Operand* label1 = new_label();
 				Operand* label2 = new_label();
 				Operand* label3 = new_label();
-				InterCodes* code1 = translate_Cond(child[2], label1, label2);
-				InterCodes* code2 = translate(child[4]);
-				code1 = codesJoin(codesInit(LABEL, 1, label1), code1);
-				code2 = codesJoin(codesInit(LABEL, 1, label2), code2);
-				code2 = codesJoin(code2, codesInit(GOTO, 1, label1));
-				code2 = codesJoin(code2, codesInit(LABEL, 1, label3));
-				return codesJoin(code1, code2);
+				InterCodes* code[6];
+				code[0] = codesInit(LABEL, 1, label1);
+				code[1] = translate_Cond(child[2], label2, label3);
+				code[2] = codesInit(LABEL, 1, label2);
+				code[3] = translate(child[4]);
+				code[4] = codesInit(GOTO, 1, label1);
+				code[5] = codesInit(LABEL, 1, label3);
+				int i;
+				for(i = 1; i < 6; i++){
+					code[0] = codesJoin(code[0], code[i]);
+				}
+				return code[0];
 			}
 			break;
 	}
