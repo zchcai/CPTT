@@ -1,5 +1,5 @@
 typedef struct OperandStruct{
-	enum{ VARIABLE_3, CONSTANT, ADDRESS}kind;
+	enum{ VARIABLE_3, CONSTANT, ADDRESS, TEMPVAR}kind;
 	union{
 		int var_no;
 		int var_int;

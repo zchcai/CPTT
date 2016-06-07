@@ -1,17 +1,10 @@
-int f(float x);
-int work(int i, int j, float k);
+int work(int i, int j, int k){
+	int ii = 0;
+	write(i+j+k);
+	ii = 1 + 1;
+	return i+j+k;
+}
 int main(){
-	f(1 + 1.5);
-	return work(1, 2);
-}
-int work(int i, int j, float k){
-	if(3){
-		goto();
-	}
-	else {
-		e = 3;
-	}
-	return 0;
-}
-int f(float x){
+	write(9);
+	return work(1, 2, 3);
 }

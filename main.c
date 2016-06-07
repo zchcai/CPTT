@@ -51,11 +51,13 @@ int main(int argc, char** argv) {
 		semantic_error_no = 0;
 		dfs(Head);
 		DeclarAndDefine();
-		if(semantic_error_no == 0){
 		/*
 		 * when no semantic error,
 		 * start intercode generation
 		 */
+		if(semantic_error_no == 0){
+			//print_node(Head, 0);
+			//stPrint();
 			intermediate_code_generation();
 		}
 		else{

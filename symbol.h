@@ -14,6 +14,7 @@ typedef struct SymbolTableNode {
 	}Message;
 	struct SymbolTableNode* next;
 	struct SymbolTableNode* fnext;
+	int op_var_no;
 }SNode;
 
 typedef struct DeclarNode {

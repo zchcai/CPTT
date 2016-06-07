@@ -5,6 +5,10 @@
 extern Node* Head;
 extern SNode* SHead;
 extern Type* TypeNodeInt;
+Operand OperandZero= {.kind = CONSTANT, .u.var_int = 0};
+Operand OperandOne= {.kind = CONSTANT, .u.var_int = 1};
+Operand* OperandNodeZero = &OperandZero;
+Operand* OperandNodeOne = &OperandOne;
 void print_intercodes(InterCodes*);
 void print_intercode(InterCode*);
 void print_operand(Operand*);
@@ -202,10 +206,13 @@ void print_operand(Operand* p){
 	if(p -> kind == VARIABLE_3){
 		printf("v%d", p -> u.var_no);
 	}
+	else if(p -> kind == TEMPVAR){
+		printf("t%d", p -> u.var_no);
+	}
 	else if(p -> kind == CONSTANT){
 		printf("#%d", p -> u.var_int);
 	}
-	else {
+	else if(p -> kind == ADDRESS){
 		printf("label%d", p -> u.var_no);
 	}
 	return ;
@@ -287,9 +294,10 @@ InterCodes* codesInit(int k, int n, ...){
 }
 Operand* opInit(int k, int var){
 	Operand* p = (Operand*)malloc(sizeof(Operand));
-	if(p == NULL)return NULL;
+	assert(p != NULL);
 	p -> kind = k;
-	if(k == VARIABLE_3 || k == ADDRESS){
+	if(k == VARIABLE_3 || k == ADDRESS || k == TEMPVAR){
+		assert(var != 0);
 		p -> u.var_no = var;
 	}
 	else if(k == CONSTANT){
