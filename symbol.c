@@ -54,7 +54,11 @@ void stPrint(){
 	while(p != NULL){
 		printf("  No %d: %s\t%d\n", i, p->name, p->visitedTag);
 		if(p -> visitedTag == VARIABLE){
-			printf("    kind no: %d\n", p -> Message.var -> kind);
+			Type* a = p -> Message.var;
+			printf("    kind no: %d\n", a -> kind);
+			if(a -> kind == ARRAY){
+				printf("      size = %d\n", a -> u.array.size);
+			}
 		}
 		else if(p -> visitedTag == FUNC){
 			printf("    returnType kind no: %d\n", p ->Message.func -> returnType -> kind);

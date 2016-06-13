@@ -1,0 +1,15 @@
+int main()
+{
+	int x = 24, y = 4, z;
+	int a = 8, b, result;
+	z = 1;
+	b = a * x / y + y - z;
+	a = x / y + b * b;
+	write(a);
+	a = y - z * 2 + x / y;
+	write(a);
+	result = a + ( a - z + x / y) * z + b;
+	write(result);
+
+	return 0;
+}

@@ -1,0 +1,25 @@
+int remainder(int num1, int num2){
+	if( num1 - num1 / num2 * num2 == 0)
+		return 0;
+	else
+		return 1;
+}
+int prime_Number(int number){
+	int i = 2;
+	while(i<number){
+		if(remainder(number,i)==0)
+			return 0;
+		i = i + 1;
+	}
+	return 1;
+}
+int main(){
+	int start = 2, end = 20;
+	int num = start;
+	while(num < end){
+		if(prime_Number(num) == 1)
+			write(num);
+		num = num + 1;
+	}
+	return 0;
+}

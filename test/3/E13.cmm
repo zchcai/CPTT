@@ -1,0 +1,52 @@
+struct Weight_Log{
+	int days;
+	int weight_lose;
+};
+
+struct People{
+	int weight_before;
+	int log_number;
+	struct Weight_Log log[5];
+};
+
+int setInit(struct People Jack, int weight1){
+	Jack.weight_before = weight1;
+	Jack.log_number = 0;
+	return 0;
+}
+int addLog(struct People Rose, int days_R,int weight_loseR){
+	Rose.log_number = Rose.log_number + 1;
+	Rose.log[Rose.log_number-1].days = days_R;
+	Rose.log[Rose.log_number-1].weight_lose = weight_loseR;
+	return 0;
+}
+int weight_Now(struct People peopleA){
+	int weight_Now1 = peopleA.weight_before;
+	int i = 0;
+	while(i < peopleA.log_number){
+		weight_Now1 = weight_Now1 - peopleA.log[i].weight_lose;
+		i = i + 1;
+	}
+	return weight_Now1;
+}
+int average_Lose(struct People peopleB){
+	int average_lose1 = 0;
+	int j = 0, days_sum = 0, weight_sum = 0;
+	while(j < peopleB.log_number){
+		days_sum = days_sum + peopleB.log[j].days;
+		weight_sum = weight_sum + peopleB.log[j].weight_lose;
+		j = j + 1;
+	}
+	return days_sum/weight_sum;
+}
+int main(){
+	struct People lily;
+	setInit(lily,55);
+	addLog(lily,6,2);
+	addLog(lily,2,0);
+	addLog(lily,20,4);
+	addLog(lily,4,2);
+	write(weight_Now(lily));
+	write(average_Lose(lily));
+	return 0;
+}

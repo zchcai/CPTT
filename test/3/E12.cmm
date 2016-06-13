@@ -1,0 +1,44 @@
+struct Class_Score {
+	int average_math;
+	int average_eng;
+	int average_ch;
+	int stu_number;
+};
+
+int sum_Score(struct Class_Score class3){
+	int result = (class3.average_math + class3.average_eng + class3.average_ch) * class3.stu_number;
+	return result;
+}
+
+int ave_Score(struct Class_Score class4){
+	int result_sum = class4.average_math + class4.average_eng + class4.average_ch;
+	return result_sum;
+}
+
+int compare(struct Class_Score class1, struct Class_Score class2){
+	int result1 = ave_Score(class1);
+	int result2 = ave_Score(class2);
+	if(result1 < result2)
+		return 1;
+	else if(result1 == result2)
+		return 2;
+	else
+		return 3;
+}
+
+int main()
+{
+	struct Class_Score classArray[2];
+	classArray[0].average_math = 98;
+	classArray[0].average_eng = 92;
+	classArray[0].average_ch = 89;
+	classArray[0].stu_number = 55;
+	classArray[1].average_math = 97;
+	classArray[1].average_eng = 99;
+	classArray[1].average_ch = 80;
+	classArray[1].stu_number = 58;
+	write(sum_Score(classArray[0]));
+	write(sum_Score(classArray[1]));
+	write(compare(classArray[0],classArray[1]));
+	return 0;
+}

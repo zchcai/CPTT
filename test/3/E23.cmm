@@ -1,0 +1,83 @@
+int print(int chess2[64]){
+
+	int chess_2wise[8][8];
+	int i2 = 0, j2 = 0;
+	while(i2 < 8){
+		j2 = 0;
+		while(j2 < 8){
+			chess_2wise[i2][j2] = chess2[i2 * 8 + j2];
+			j2 = j2 + 1;
+		}
+		i2 = i2 + 1;
+	}
+	i2 = 0;
+	j2 = 0;
+	while(i2 < 8){
+		j2 = 0;
+		while(j2 < 8){
+			if(chess_2wise[i2][j2] == 1)
+				write(j2);
+			j2 = j2 + 1;
+		}
+		i2 = i2 + 1;
+	}
+	return 0;
+}
+int PutQueen(int chess[64], int a[8], int b[15], int c[15], int n, int sum)
+{
+	int col, i, j;
+	col = 0;
+	while(col < 8)
+	{
+		if(a[col] && b[n + col] && c[n - col + 7])
+		{
+			chess[n * 8 + col] = 1;
+			a[col] = 0;
+			b[n + col] = 0;
+			c[n - col + 7] = 0;
+			if(n == 7)
+			{
+				sum = sum + 1;
+				if(sum == 1){
+					print(chess);
+				}
+			}
+			else
+				sum = PutQueen(chess, a, b, c, n+1, sum);
+
+			chess[n * 8 + col]=0;
+			b[n + col]=1;
+			c[n - col + 7]=1;
+			a[col]=1;
+		}
+		col = col + 1;
+	}
+	return sum;
+}
+int main()
+{
+	int chess1[64];
+	int a1[8], b1[15], c1[15];
+	int sum1 = 0;
+	int i1;
+	i1 = 0;
+	while(i1 < 64){
+		chess1[i1] = 0;
+		i1 = i1 + 1;
+	}
+	i1 = 0;
+	while(i1 < 8){
+		a1[i1] = 1;
+		i1 = i1 + 1;
+	}
+	i1 = 0;
+	while(i1 < 15){
+		b1[i1] = 1;
+		c1[i1] = 1;
+		i1 = i1 + 1;
+	}
+	sum1 = PutQueen(chess1, a1, b1, c1, 0, sum1);
+	write(sum1);
+
+	return 0;
+}

@@ -1,0 +1,19 @@
+int remainder(int num1, int num2){
+	return num1 - num1 / num2 * num2;
+}
+int main()
+{
+	int m, n, a, b, t, c;
+	a = read();
+	b = read();
+	m=a;
+	n=b;
+	while(b!=0){
+		c=remainder(a,b);
+		a=b;
+		b=c;
+	}
+	write(a);
+	write(m * n / a);
+	return 0;
+}

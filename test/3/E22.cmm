@@ -1,0 +1,42 @@
+int sort(int array[10], int length){
+	int i, j, tmp, min_loc;
+	if(length == 0)
+		return -1;
+	i = 0;
+	while(i < length - 1){
+		min_loc = i;
+		j = i + 1;
+		while(j < length){
+			if(array[j] < array[min_loc])
+				min_loc = j;
+			j = j + 1;
+		}
+		if(i != min_loc){
+			tmp = array[i];
+			array[i] = array[min_loc];
+			array[min_loc] = tmp;
+		}
+		i = i + 1;
+	}
+	return 0;
+}
+
+int print(int array2[10], int len){
+	int i1 = 0;
+	while(i1 < len){
+		write(array2[i1]);
+		i1 = i1 + 1;
+	}
+	return 0;
+}
+
+int main(){
+	int array_insert[10];
+	int j1 = 0;
+	while(j1 < 10){
+		array_insert[j1] = (j1 - 12) * (j1 + 1) * (j1 - 11);
+		j1 = j1 + 1;
+	}
+	sort(array_insert, 10);
+	print(array_insert, 10);
+}

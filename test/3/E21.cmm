@@ -1,0 +1,26 @@
+int main(){
+	int array[5][4];
+	int r = 5, c = 4;
+	int i = 0, j = 0, sum = 0;
+	while(i < r){
+		j = 0;
+		while(j < c){
+			array[i][j] = i * j + 1;
+			j = j + 1;
+		}
+		i = i + 1;
+	}
+	i = 0;
+	j = 0;
+	while(i < r){
+		j = 0;
+		while(j < c){
+			sum = sum + array[i][j];
+			j = j + 1;
+		}
+		i = i + 1;
+	}
+	write(sum);
+
+	return 0;
+}

@@ -24,6 +24,7 @@ Operand* new_label(){
 	label_address_no ++;
 	return opInit(LABELADDRESS, label_address_no);
 }
+
 int calcTypeSize(Type* vartype){
 	int  size = 0;
 	if(vartype -> kind == BASIC){
@@ -234,25 +235,35 @@ InterCodes* translate_Exp(Node* p, Operand* place){
 			return codesJoin(code1, codesInit(WRITE, 1 ,t1));
 		}
 		else {
-			//TODO
 			InterCodes* code1 = translate_Args(child[2]);
-			return codesJoin(code1, codesInit(CALLFUNC, 2, place, stnode));
+			Operand* drop = new_temp();
+			InterCodes* code2 = codesInit(CALLFUNC, 2, drop, stnode);
+			if(place != NULL)code2 = codesJoin(code2, codesInit(ASSIGN_ORIGIN, 2, place, drop));
+			return codesJoin(code1, code2);
 		}
 	}
 	/* ID LP RP */
 	else if(childno == 3 && child[0] -> type == ID){
 		SNode* fnode = stFind(child[0] -> String);
 		if(strcmp(fnode -> name, "read") == 0){
-			return codesInit(READ, 1, place);
+			if(place != NULL) return codesInit(READ, 1, place);
+			else {
+				Operand* drop = new_temp();
+				return codesInit(READ, 1, drop);
+			}
 		}
 		else {
-			return codesInit(CALLFUNC, 2, place, fnode);
+			if(place != NULL)return codesInit(CALLFUNC, 2, place, fnode);
+			else{
+				Operand* drop = new_temp();
+				return codesInit(CALLFUNC, 2, drop, fnode);
+			}
 		}
 	}
 	/* Exp LB Exp RB */
 	else if(childno == 4 && child[1] -> type == LB){
 		InterCodes* code[6];
-		Type* ptype = doExp(p);
+		Type* ptype = doExp(p); // this is for "place"
 
 		Operand* base = new_temp();
 		code[0] = translate_Exp(child[0], base);

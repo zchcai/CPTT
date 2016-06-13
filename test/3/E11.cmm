@@ -1,0 +1,23 @@
+struct Food {
+	int number;
+	int weight;
+	int price;
+};
+int purchase(int n, int w, int p){
+	return n * w * p;
+}
+int sum(int sum1, int sum2){
+	return sum1 + sum2;
+}
+int main()
+{
+	struct Food food;
+	int food_sum1, food_sum2;
+	food.number = 2;
+	food.weight = 5;
+	food.price = 4;
+	food_sum1 = purchase(food.number, food.weight, food.price);
+	food_sum2 = purchase(food.number + 1, food.weight + 1, food.price);
+	write(sum(food_sum1,food_sum2));
+	return 0;
+}

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "translate.c"
+extern FILE* ir;
 extern int translate_error;
 extern Node* Head;
 extern SNode* SHead;
@@ -84,68 +85,68 @@ void print_intercode(InterCode* p){
 	int k = p -> kind;
 	/* LABEL x : */
 	if(k == LABEL){
-		printf("LABEL ");
+		fprintf(ir,"LABEL ");
 		print_operand(p -> u.one.op);
-		printf(" :");
+		fprintf(ir," :");
 	}
 	/* FUNCTION f : */
 	else if(k == FUNCTION_3){
-		printf("FUNCTION %s :", p -> u.func.stnode -> name);
+		fprintf(ir,"FUNCTION %s :", p -> u.func.stnode -> name);
 	}
 	/* x := y */
 	else if(k == ASSIGN_ORIGIN){
 		print_operand(p -> u.assign.left);
-		printf(" := ");
+		fprintf(ir," := ");
 		print_operand(p -> u.assign.right);
 	}
 	/* x := y ? z */
 	else if(k == ADD_3 || k == SUB_3 || k == MUL_3 || k == DIV_3){
 		print_operand(p -> u.binop.result);
-		printf(" := ");
+		fprintf(ir," := ");
 		print_operand(p -> u.binop.op1);
 		if(k == ADD_3){
-			printf(" + ");
+			fprintf(ir," + ");
 		}
 		else if(k == SUB_3){
-			printf(" - ");
+			fprintf(ir," - ");
 		}
 		else if(k == MUL_3){
-			printf(" * ");
+			fprintf(ir," * ");
 		}
 		else if(k == DIV_3){
-			printf(" / ");
+			fprintf(ir," / ");
 		}
 		print_operand(p -> u.binop.op2);
 	}
 	/* x := &y */
 	else if(k == ASSIGN_ADDRESS_TO){
 		print_operand(p -> u.assign.left);
-		printf(" := ");
-		printf("&");
+		fprintf(ir," := ");
+		fprintf(ir,"&");
 		print_operand(p -> u.assign.right);
 	}
 	/* x := *y */
 	else if(k == ASSIGN_VALUE_FROM){
 		print_operand(p -> u.assign.left);
-		printf(" := ");
-		printf("*");
+		fprintf(ir," := ");
+		fprintf(ir,"*");
 		print_operand(p -> u.assign.right);
 	}
 	/* *x := y */
 	else if(k == ASSIGN_TO_ADDRESS){
-		printf("*");
+		fprintf(ir,"*");
 		print_operand(p -> u.assign.left);
-		printf(" := ");
+		fprintf(ir," := ");
 		print_operand(p -> u.assign.right);
 	}
 	/* GOTO x */
 	else if(k == GOTO){
-		printf("GOTO ");
+		fprintf(ir,"GOTO ");
 		print_operand(p -> u.one.op);
 	}
 	/* IF x [relop] y GOTO z */
 	else if(k == IFGOTO){
-		printf("IF ");
+		fprintf(ir,"IF ");
 		print_operand(p -> u.ifgoto.rel1);
 		char* s = (char*)malloc(4 * sizeof(char));
 		memset(s, 0, sizeof(s));
@@ -157,69 +158,69 @@ void print_intercode(InterCode* p){
 			case EQ: strcpy(s, "==");break;
 			case NE : strcpy(s, "!=");break;
 		}
-		printf(" %s ", s);
+		fprintf(ir," %s ", s);
 		print_operand(p -> u.ifgoto.rel2);
-		printf(" GOTO ");
+		fprintf(ir," GOTO ");
 		print_operand(p -> u.ifgoto.go);
 	}
 	/* RETURN x */
 	else if(k == RETURN_3){
-		printf("RETURN ");
+		fprintf(ir,"RETURN ");
 		print_operand(p -> u.one.op);
 	}
 	/* DEC x [size] */
 	else if(k == DEC){
-		printf("DEC ");
+		fprintf(ir,"DEC ");
 		print_operand(p -> u.dec.op);
-		printf(" %d", p -> u.dec.size);
+		fprintf(ir," %d", p -> u.dec.size);
 	}
 	/* ARG x */
 	else if(k == ARG){
-		printf("ARG ");
+		fprintf(ir,"ARG ");
 		print_operand(p -> u.one.op);
 	}
 	/* x := CALL f */
 	else if(k == CALLFUNC){
 		print_operand(p -> u.call.op);
-		printf(" := CALL %s", p -> u.call.stnode -> name);
+		fprintf(ir," := CALL %s", p -> u.call.stnode -> name);
 	}
 	/* PARAM x */
 	else if(k == PARAM){
-		printf("PARAM ");
+		fprintf(ir,"PARAM ");
 		print_operand(p -> u.one.op);
 	}
 	/* READ x */
 	else if(k == READ){
-		printf("READ ");
+		fprintf(ir,"READ ");
 		print_operand(p -> u.one.op);
 	}
 	/* WRITE x */
 	else if(k == WRITE){
-		printf("WRITE ");
+		fprintf(ir,"WRITE ");
 		print_operand(p -> u.one.op);
 	}
 	/* [\n] */
 	else if(k == BLANKLINE){
 		/* nothing */
 	}
-	printf("\n");
+	fprintf(ir,"\n");
 }	
 void print_operand(Operand* p){
 	assert(p != NULL);
 	if(p -> kind == VARIABLE_3){
-		printf("v%d", p -> u.var_no);
+		fprintf(ir,"v%d", p -> u.var_no);
 	}
 	else if(p -> kind == TEMPVAR){
-		printf("t%d", p -> u.var_no);
+		fprintf(ir,"t%d", p -> u.var_no);
 	}
 	else if(p -> kind == CONSTANT){
-		printf("#%d", p -> u.var_int);
+		fprintf(ir,"#%d", p -> u.var_int);
 	}
 	else if(p -> kind == LABELADDRESS){
-		printf("label%d", p -> u.var_no);
+		fprintf(ir,"label%d", p -> u.var_no);
 	}
 	else if(p -> kind == ADDRESS){
-		printf("&v%d", p -> u.var_no);
+		fprintf(ir,"&v%d", p -> u.var_no);
 	}
 	return ;
 }

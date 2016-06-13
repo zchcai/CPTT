@@ -11,6 +11,7 @@ extern SNode* FunDeclarHead;
 extern Type* TypeNodeInt;
 extern Type* TypeNodeFloat;
 Type* currentFuncReturnType = NULL;
+FILE* ir = NULL;
 void dfs(Node*);
 void doExtDecList(Node* p, Type* type);
 void doFunDecInDeclar(Node* p, Type* pt);
@@ -60,7 +61,17 @@ int main(int argc, char** argv) {
 				print_node(Head, 0);
 				stPrint();
 			}
+			else if(argc > 2){
+				ir = fopen(argv[2], "w");
+				if (!ir) {
+					perror(argv[2]);
+					return 1;
+				}
+				translate_error = 0;
+				intermediate_code_generation();
+			}
 			else {
+				ir = stdout;
 				translate_error = 0;
 				intermediate_code_generation();
 			}
@@ -198,6 +209,16 @@ void doExtDecList(Node* p, Type* type){
 	if(p -> childno == 3)doExtDecList(p -> child[2], type);
 }
 Type* doVarDec(Node* p, Type* type){
+	if(p -> childno == 4){
+		int size = p -> child[2] -> value.Int;
+		Type* pvar = (Type*)malloc(sizeof(Type));
+		pvar -> u.array.size = size;
+		pvar -> kind = ARRAY;
+		pvar -> u.array.elem = type;
+		return doVarDec(p -> child[0], pvar);
+	}
+	return type;
+/*
 	Type* finaltype = type;
 	if(p -> childno == 4){
 		Type* pvar = (Type*)malloc(sizeof(Type));
@@ -207,6 +228,7 @@ Type* doVarDec(Node* p, Type* type){
 		finaltype = pvar;
 	}
 	return finaltype;
+	*/
 }
 void doFunDecInDeclar(Node* p, Type* pt){
 	assert(p != NULL);
