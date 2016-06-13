@@ -29,7 +29,7 @@ void DeclarAndDefine();
 Type* doVarDec(Node*, Type*);
 void semantic_print_error(int no, int line, char* msg);
 void semantic_error(int no, int line);
-int semantic_error_no;
+int semantic_error_no, translate_error;
 int main(int argc, char** argv) {
 	if (argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
@@ -56,9 +56,14 @@ int main(int argc, char** argv) {
 		 * start intercode generation
 		 */
 		if(semantic_error_no == 0){
-			//print_node(Head, 0);
-			//stPrint();
-			intermediate_code_generation();
+			if(argc > 2 && strcmp(argv[2], "debug") == 0){
+				print_node(Head, 0);
+				stPrint();
+			}
+			else {
+				translate_error = 0;
+				intermediate_code_generation();
+			}
 		}
 		else{
 			/* print info for debug */

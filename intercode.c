@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "translate.c"
+extern int translate_error;
 extern Node* Head;
 extern SNode* SHead;
 extern Type* TypeNodeInt;
@@ -41,7 +42,7 @@ void intermediate_code_generation(){
 	//return ;
 	Node* root = Head;
 	InterCodes* code = translate(root);
-	print_intercodes(code);
+	if(translate_error == 0)print_intercodes(code);
 }
 void add_read_write(){
 	SNode* pr = stInitNode("read");
@@ -218,7 +219,7 @@ void print_operand(Operand* p){
 		printf("label%d", p -> u.var_no);
 	}
 	else if(p -> kind == ADDRESS){
-		//TODO
+		printf("&v%d", p -> u.var_no);
 	}
 	return ;
 }
@@ -309,7 +310,8 @@ Operand* opInit(int k, int var){
 		p -> u.var_int = var;
 	}
 	else if(k == ADDRESS){
-		//TODO
+		assert(var != 0);
+		p -> u.var_no = var;
 	}
 	return p;
 }

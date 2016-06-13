@@ -19,6 +19,8 @@ SNode* stInitNode(char* name){
 	p->lineno = 0;
 	p->next = NULL;
 	p->fnext = NULL;
+	p -> op_var_no = 0;
+	p -> isParam = 0;
 	return p;
 }
 

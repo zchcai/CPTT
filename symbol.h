@@ -15,6 +15,7 @@ typedef struct SymbolTableNode {
 	struct SymbolTableNode* next;
 	struct SymbolTableNode* fnext;
 	int op_var_no;
+	int isParam;
 }SNode;
 
 typedef struct DeclarNode {
